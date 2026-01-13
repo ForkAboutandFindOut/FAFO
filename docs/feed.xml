@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
   <channel>
     <title>Fork Around &amp; Find Out</title>
     <link>https://forkaboutandfindout.github.io/FAFO</link>
-    <description>Interviews on AI, tech, and early-stage builders.</description>
+    <description>Welcome to Fork About and Find Out; a project showcasing exceptional individuals in tech, AI and company creation.</description>
     <language>en</language>
+    <lastBuildDate>Tue, 13 Jan 2026 10:51:02 +0000</lastBuildDate>
+
+    <itunes:author>ForkAboutandFindOut</itunes:author>
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:image href="https://forkaboutandfindout.github.io/FAFO/cover.jpg" />
+    <itunes:category text="Technology" />
+
+    <itunes:owner>
+      <itunes:name>ForkAboutandFindOut</itunes:name>
+      <itunes:email></itunes:email>
+    </itunes:owner>
+
+
   </channel>
 </rss>
