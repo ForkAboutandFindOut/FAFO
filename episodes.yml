@@ -1,0 +1,11 @@
+podcast:
+  title: "Fork Around & Find Out"
+  description: "Interviews on AI, tech, and early-stage builders."
+  author: "ForkAboutandFindOut"
+  language: "en"
+  site_url: "https://forkaboutandfindout.github.io/FAFO"
+  cover_image: "https://forkaboutandfindout.github.io/FAFO/cover.jpg"
+  category: "Technology"
+  explicit: "false"
+
+episodes: []
