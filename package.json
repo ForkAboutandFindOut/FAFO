@@ -1,0 +1,7 @@
+{
+  "name": "fafo-pages",
+  "private": true,
+  "dependencies": {
+    "@supabase/ssr": "^0.5.2"
+  }
+}
