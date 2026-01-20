@@ -1,3 +1,22 @@
+export async function onRequest(context) {
+  const { request, next } = context;
+  const url = new URL(request.url);
+  const path = url.pathname;
+
+  // ✅ Always allow API + auth callback routes (no login redirect)
+  if (path.startsWith("/api/")) return next();
+  if (path.startsWith("/auth/")) return next();
+
+  // ✅ Always allow the login page itself + obvious public assets
+  if (path === "/login") return next();
+  if (path === "/") return next(); // optional: only if you want homepage public
+  if (path.includes(".")) return next(); // css/js/png/favicon etc.
+
+  // --- your existing auth gating logic below ---
+  // if not logged in -> redirect to /login
+  // else -> return next()
+}
+
 import { createServerClient } from "@supabase/ssr";
 
 function parseCookies(cookieHeader: string | null): Record<string, string> {
