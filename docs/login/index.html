@@ -22,65 +22,27 @@
       <p id="msg" class="hint"></p>
     </form>
 
-    <script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-
-  // MUST be your real values from Supabase "Project API"
-  const SUPABASE_URL = "https://YOURPROJECT.supabase.co";
-  const SUPABASE_ANON_KEY = "YOUR_PUBLISHABLE_ANON_KEY";
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+   <script type="module">
   const f = document.getElementById("f");
-  const email = document.getElementById("email");
+  const emailEl = document.getElementById("email");
   const msg = document.getElementById("msg");
-
-  async function healthCheck() {
-    // quick reachability test
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/health`, {
-      headers: { apikey: SUPABASE_ANON_KEY }
-    });
-    if (!res.ok) throw new Error(`Supabase health check failed: ${res.status}`);
-    return res.json();
-  }
 
   f.addEventListener("submit", async (e) => {
     e.preventDefault();
-    msg.className = "hint";
-    msg.textContent = "Checking connectivity…";
+    msg.textContent = "Sending sign-in link…";
 
-    try {
-      await healthCheck();
-    } catch (err) {
-      msg.className = "err";
-      msg.textContent =
-        "Can’t reach Supabase from this network (or URL/key is wrong). Try hotspot/VPN or re-check SUPABASE_URL + key.";
+    const res = await fetch("/api/send-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: emailEl.value.trim() }),
+    });
+
+    if (!res.ok) {
+      msg.textContent = await res.text();
       return;
     }
 
-    msg.textContent = "Sending sign-in link…";
-
-    const redirectTo = `${location.origin}/auth/callback?next=${encodeURIComponent("/")}`;
-
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email.value.trim(),
-        options: { emailRedirectTo: redirectTo }
-      });
-
-      if (error) {
-        msg.className = "err";
-        msg.textContent = error.message;
-        return;
-      }
-
-      msg.className = "ok";
-      msg.textContent = "Check your email for the sign-in link.";
-    } catch (err) {
-      msg.className = "err";
-      msg.textContent =
-        "Request failed (network blocked). Try hotspot/VPN or change DNS.";
-    }
+    msg.textContent = "Check your email for the sign-in link.";
   });
     </script>
   </body>
