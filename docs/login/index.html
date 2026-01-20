@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Sign in</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; max-width: 520px; margin: 48px auto; padding: 0 16px; }
+      input, button { width: 100%; padding: 12px; font-size: 16px; margin: 8px 0; }
+      .hint { color: #666; font-size: 14px; }
+      .err { color: #b00020; }
+      .ok { color: #0a7a0a; }
+    </style>
+  </head>
+  <body>
+    <h1>Sign in to access</h1>
+    <p class="hint">We’ll email you a sign-in link.</p>
+
+    <form id="f">
+      <input id="email" type="email" placeholder="you@domain.com" required />
+      <button type="submit">Send sign-in link</button>
+      <p id="msg" class="hint"></p>
+    </form>
+
+    <script type="module">
+      import { createBrowserClient } from "https://esm.sh/@supabase/ssr@0.5.2";
+
+      // Paste from Supabase "Project API" page:
+      const SUPABASE_URL = "https://YOURPROJECT.supabase.co";
+      const SUPABASE_ANON_KEY = "YOUR_PUBLISHABLE_ANON_KEY";
+
+      const supabase = createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      const f = document.getElementById("f");
+      const email = document.getElementById("email");
+      const msg = document.getElementById("msg");
+
+      f.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        msg.className = "hint";
+        msg.textContent = "Sending…";
+
+        const redirectTo = `${location.origin}/auth/callback?next=${encodeURIComponent("/")}`;
+
+        const { error } = await supabase.auth.signInWithOtp({
+          email: email.value.trim(),
+          options: { emailRedirectTo: redirectTo }
+        });
+
+        if (error) {
+          msg.className = "err";
+          msg.textContent = error.message;
+          return;
+        }
+
+        msg.className = "ok";
+        msg.textContent = "Check your email for the sign-in link.";
+      });
+    </script>
+  </body>
+</html>
