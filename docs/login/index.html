@@ -23,39 +23,65 @@
     </form>
 
     <script type="module">
-      import { createBrowserClient } from "https://esm.sh/@supabase/ssr@0.5.2";
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-      // Paste from Supabase "Project API" page:
-      const SUPABASE_URL = "https://YOURPROJECT.supabase.co";
-      const SUPABASE_ANON_KEY = "YOUR_PUBLISHABLE_ANON_KEY";
+  // MUST be your real values from Supabase "Project API"
+  const SUPABASE_URL = "https://YOURPROJECT.supabase.co";
+  const SUPABASE_ANON_KEY = "YOUR_PUBLISHABLE_ANON_KEY";
 
-      const supabase = createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      const f = document.getElementById("f");
-      const email = document.getElementById("email");
-      const msg = document.getElementById("msg");
+  const f = document.getElementById("f");
+  const email = document.getElementById("email");
+  const msg = document.getElementById("msg");
 
-      f.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        msg.className = "hint";
-        msg.textContent = "Sending…";
+  async function healthCheck() {
+    // quick reachability test
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/health`, {
+      headers: { apikey: SUPABASE_ANON_KEY }
+    });
+    if (!res.ok) throw new Error(`Supabase health check failed: ${res.status}`);
+    return res.json();
+  }
 
-        const redirectTo = `${location.origin}/auth/callback?next=${encodeURIComponent("/")}`;
+  f.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msg.className = "hint";
+    msg.textContent = "Checking connectivity…";
 
-        const { error } = await supabase.auth.signInWithOtp({
-          email: email.value.trim(),
-          options: { emailRedirectTo: redirectTo }
-        });
+    try {
+      await healthCheck();
+    } catch (err) {
+      msg.className = "err";
+      msg.textContent =
+        "Can’t reach Supabase from this network (or URL/key is wrong). Try hotspot/VPN or re-check SUPABASE_URL + key.";
+      return;
+    }
 
-        if (error) {
-          msg.className = "err";
-          msg.textContent = error.message;
-          return;
-        }
+    msg.textContent = "Sending sign-in link…";
 
-        msg.className = "ok";
-        msg.textContent = "Check your email for the sign-in link.";
+    const redirectTo = `${location.origin}/auth/callback?next=${encodeURIComponent("/")}`;
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email.value.trim(),
+        options: { emailRedirectTo: redirectTo }
       });
+
+      if (error) {
+        msg.className = "err";
+        msg.textContent = error.message;
+        return;
+      }
+
+      msg.className = "ok";
+      msg.textContent = "Check your email for the sign-in link.";
+    } catch (err) {
+      msg.className = "err";
+      msg.textContent =
+        "Request failed (network blocked). Try hotspot/VPN or change DNS.";
+    }
+  });
     </script>
   </body>
 </html>
