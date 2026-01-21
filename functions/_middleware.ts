@@ -30,16 +30,18 @@ export const onRequest: PagesFunction = async (context) => {
   const url = new URL(request.url);
   const path = url.pathname;
 
-  // Public allowlist
-  if (
-    path === "/login" ||
-    path === "/login/" ||
-    path.startsWith("/auth/") ||
-    path.startsWith("/api/") ||
-    path.match(/\.[a-zA-Z0-9]+$/) // assets: .css .js .png .ico etc
-  ) {
-    return next();
-  }
+// Public allowlist
+if (
+  path === "/login" ||
+  path === "/login/" ||
+  path === "/health" ||
+  path === "/health/" ||
+  path.startsWith("/auth/") ||
+  path.startsWith("/api/") ||
+  path.match(/\.[a-zA-Z0-9]+$/) // assets: .css .js .png .ico etc
+) {
+  return next();
+}
 
   const requestCookies = parseCookies(request.headers.get("Cookie"));
   const setCookies: string[] = [];
