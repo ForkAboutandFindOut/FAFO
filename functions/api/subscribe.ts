@@ -1,0 +1,53 @@
+import type { PagesFunction } from "@cloudflare/workers-types";
+
+const json = (data: unknown, status = 200) =>
+  new Response(JSON.stringify(data), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
+
+export const onRequestGet: PagesFunction = async () => {
+  return json({ ok: false, error: "Use POST" }, 405);
+};
+
+export const onRequestPost: PagesFunction = async (context) => {
+  const SUPABASE_URL = (context.env.SUPABASE_URL as string | undefined)?.trim();
+  const SERVICE_KEY = (context.env.SUPABASE_SERVICE_ROLE_KEY as string | undefined)?.trim();
+
+  if (!SUPABASE_URL || !SERVICE_KEY) {
+    return json({ ok: false, error: "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY" }, 500);
+  }
+
+  let body: any;
+  try {
+    body = await context.request.json();
+  } catch {
+    return json({ ok: false, error: "Body must be JSON" }, 400);
+  }
+
+  const email = String(body?.email || "").trim().toLowerCase();
+  const name = String(body?.name || "").trim();
+
+  if (!email || !email.includes("@")) return json({ ok: false, error: "Invalid email" }, 400);
+  if (name.length > 120) return json({ ok: false, error: "Name too long" }, 400);
+
+  const url = `${SUPABASE_URL}/rest/v1/mailing_list?on_conflict=email`;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      apikey: SERVICE_KEY,
+      authorization: `Bearer ${SERVICE_KEY}`,
+      prefer: "resolution=merge-duplicates,return=minimal",
+    },
+    body: JSON.stringify({ email, name: name || null }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    return json({ ok: false, error: `Supabase insert failed (${res.status})`, details: text }, 502);
+  }
+
+  return json({ ok: true });
+};
