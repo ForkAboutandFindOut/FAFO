@@ -3,47 +3,101 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Sign in</title>
+    <title>Fork About & Find Out — Access</title>
     <style>
-      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; max-width: 520px; margin: 48px auto; padding: 0 16px; }
-      input, button { width: 100%; padding: 12px; font-size: 16px; margin: 8px 0; }
-      .hint { color: #666; font-size: 14px; }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        max-width: 520px;
+        margin: 48px auto;
+        padding: 0 16px;
+        line-height: 1.35;
+      }
+      h1 { margin: 0 0 8px; }
+      .hint { color: #666; font-size: 14px; margin: 0 0 16px; }
+      form { margin-top: 16px; }
+      label { display: block; font-size: 14px; color: #333; margin: 12px 0 6px; }
+      input, button {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        margin: 0;
+        box-sizing: border-box;
+      }
+      button { margin-top: 14px; cursor: pointer; }
+      #msg { margin-top: 12px; font-size: 14px; }
       .err { color: #b00020; }
       .ok { color: #0a7a0a; }
+      .tiny { font-size: 12px; color: #777; margin-top: 14px; }
     </style>
   </head>
+
   <body>
-    <h1>Sign in to access</h1>
-    <p class="hint">We’ll email you a sign-in link.</p>
+    <h1>Get access</h1>
+    <p class="hint">Drop your email (and optionally your name). We’ll add you to the list and let you in.</p>
 
     <form id="f">
-      <input id="email" type="email" placeholder="you@domain.com" required />
-      <button type="submit">Send sign-in link</button>
-      <p id="msg" class="hint"></p>
+      <label for="name">Name (optional)</label>
+      <input id="name" name="name" type="text" placeholder="Ada Lovelace" autocomplete="name" />
+
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" placeholder="you@domain.com" autocomplete="email" required />
+
+      <button id="btn" type="submit">Continue</button>
+
+      <p id="msg" class="hint" aria-live="polite"></p>
+      <p class="tiny">No spam. You can unsubscribe any time.</p>
     </form>
 
-   <script type="module">
-  const f = document.getElementById("f");
-  const emailEl = document.getElementById("email");
-  const msg = document.getElementById("msg");
+    <script>
+      const f = document.getElementById("f");
+      const nameEl = document.getElementById("name");
+      const emailEl = document.getElementById("email");
+      const msg = document.getElementById("msg");
+      const btn = document.getElementById("btn");
 
-  f.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    msg.textContent = "Sending sign-in link…";
+      const params = new URLSearchParams(window.location.search);
+      const next = params.get("next") || "/";
 
-    const res = await fetch("/api/send-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: emailEl.value.trim() }),
-    });
+      function setMsg(text, type) {
+        msg.textContent = text || "";
+        msg.className = type ? type : "hint";
+      }
 
-    if (!res.ok) {
-      msg.textContent = await res.text();
-      return;
-    }
+      f.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        setMsg("Saving…", "hint");
+        btn.disabled = true;
 
-    msg.textContent = "Check your email for the sign-in link.";
-  });
+        const payload = {
+          name: nameEl.value.trim(),
+          email: emailEl.value.trim()
+        };
+
+        try {
+          const res = await fetch("/api/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await res.json().catch(() => ({}));
+
+          if (!res.ok || !data.ok) {
+            const err = data.error || data.details || "Something went wrong.";
+            setMsg("❌ " + err, "err");
+            btn.disabled = false;
+            return;
+          }
+
+          setMsg("✅ You’re in. Redirecting…", "ok");
+
+          // If middleware redirects /login?next=..., send them there
+          window.location.assign(next);
+        } catch (err) {
+          setMsg("❌ Network error. Try again.", "err");
+          btn.disabled = false;
+        }
+      });
     </script>
   </body>
 </html>
