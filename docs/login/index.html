@@ -4,63 +4,233 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Fork About & Find Out — Access</title>
+
     <style>
-      body {
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-        max-width: 520px;
-        margin: 48px auto;
-        padding: 0 16px;
-        line-height: 1.35;
+      :root{
+        --w98-bg: #008080;          /* Win98 teal desktop */
+        --w98-face: #c0c0c0;        /* window face */
+        --w98-shadow: #808080;      /* dark bevel */
+        --w98-hilite: #ffffff;      /* light bevel */
+        --w98-text: #000000;
+        --w98-title: #000080;       /* titlebar navy */
+        --w98-title-text: #ffffff;
       }
-      h1 { margin: 0 0 8px; }
-      .hint { color: #666; font-size: 14px; margin: 0 0 16px; }
-      form { margin-top: 16px; }
-      label { display: block; font-size: 14px; color: #333; margin: 12px 0 6px; }
-      input, button {
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
+
+      html, body { height: 100%; }
+
+      /* Desktop background */
+      body{
         margin: 0;
-        box-sizing: border-box;
+        background: var(--w98-bg);
+        color: var(--w98-text);
+        font-family: "MS Sans Serif", Tahoma, Verdana, Arial, sans-serif;
+        -webkit-font-smoothing: none;
+        -moz-osx-font-smoothing: auto;
+        text-rendering: geometricPrecision;
       }
-      button { margin-top: 14px; cursor: pointer; }
-      #msg { margin-top: 12px; font-size: 14px; }
-      .err { color: #b00020; }
-      .ok { color: #0a7a0a; }
-      .tiny { font-size: 12px; color: #777; margin-top: 14px; }
+
+      .wrap{
+        min-height: 100%;
+        display: grid;
+        place-items: center;
+        padding: 40px 16px;
+      }
+
+      /* Win98 window */
+      .window{
+        width: min(520px, 100%);
+        background: var(--w98-face);
+        border: 2px solid var(--w98-hilite);
+        box-shadow:
+          inset -2px -2px 0 var(--w98-shadow),
+          inset  2px  2px 0 var(--w98-hilite),
+          2px 2px 0 #000;
+      }
+
+      /* Title bar */
+      .titlebar{
+        background: var(--w98-title);
+        color: var(--w98-title-text);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 8px;
+        font-weight: 700;
+        user-select: none;
+      }
+
+      .titlebar-left{
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .titlebar-left .title{
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .titlebar-controls{
+        display: flex;
+        gap: 6px;
+      }
+
+      .ctrl{
+        width: 18px;
+        height: 18px;
+        background: var(--w98-face);
+        border: 2px solid var(--w98-hilite);
+        box-shadow:
+          inset -2px -2px 0 var(--w98-shadow),
+          inset  2px  2px 0 var(--w98-hilite);
+      }
+
+      /* Window body */
+      .content{
+        padding: 14px 16px 16px;
+      }
+
+      .header{
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .logo{
+        width: 56px;
+        height: 56px;
+        border-radius: 8px;
+        background: #fff;
+        object-fit: cover;
+        image-rendering: pixelated;
+        border: 2px solid var(--w98-hilite);
+        box-shadow:
+          inset -2px -2px 0 var(--w98-shadow),
+          inset  2px  2px 0 var(--w98-hilite);
+      }
+
+      h1{
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      /* Form */
+      form{ margin: 0; }
+
+      label{
+        display: block;
+        font-size: 13px;
+        margin: 12px 0 6px;
+      }
+
+      input{
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
+        font-size: 14px;
+        background: #ffffff;
+        border: 2px solid #000;
+        box-shadow:
+          inset 2px 2px 0 var(--w98-shadow),
+          inset -2px -2px 0 var(--w98-hilite);
+      }
+
+      button{
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 14px;
+        padding: 10px;
+        font-size: 14px;
+        background: var(--w98-face);
+        border: 2px solid var(--w98-hilite);
+        box-shadow:
+          inset -2px -2px 0 var(--w98-shadow),
+          inset  2px  2px 0 var(--w98-hilite);
+        cursor: pointer;
+      }
+
+      button:active{
+        box-shadow:
+          inset 2px 2px 0 var(--w98-shadow),
+          inset -2px -2px 0 var(--w98-hilite);
+      }
+
+      button:disabled{
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+
+      /* Hidden message area: keep functionality, but don't show UI text unless needed */
+      #msg{
+        margin: 0;
+        height: 0;
+        overflow: hidden;
+        padding: 0;
+      }
+      .err{ color: #b00020; }
+      .ok{ color: #0a7a0a; }
+
+      /* Optional: subtle “screen” texture */
+      .window{
+        background-image: linear-gradient(rgba(0,0,0,0.02), rgba(0,0,0,0.02));
+      }
     </style>
   </head>
 
   <body>
-    <h1>Get access</h1>
-    <p class="hint">Drop your email and name. We’ll add you to the list and let you in.</p>
+    <div class="wrap">
+      <div class="window" role="dialog" aria-label="FAFO Access">
+        <div class="titlebar">
+          <div class="titlebar-left">
+            <div class="title">Fork About &amp; Find Out</div>
+          </div>
+          <div class="titlebar-controls" aria-hidden="true">
+            <div class="ctrl" title="Minimize"></div>
+            <div class="ctrl" title="Maximize"></div>
+            <div class="ctrl" title="Close"></div>
+          </div>
+        </div>
 
-    <form id="f">
-      <label for="name">Name</label>
-      <input
-        id="name"
-        name="name"
-        type="text"
-        placeholder="Ada Lovelace"
-        autocomplete="name"
-        required
-      />
+        <div class="content">
+          <div class="header">
+            <img class="logo" src="/assets/fafo-logo.png" alt="FAFO logo" />
+            <h1>Get access</h1>
+          </div>
 
-      <label for="email">Email</label>
-      <input
-        id="email"
-        name="email"
-        type="email"
-        placeholder="you@domain.com"
-        autocomplete="email"
-        required
-      />
+          <form id="f">
+            <label for="name">Name</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              placeholder="Ada Lovelace"
+              autocomplete="name"
+              required
+            />
 
-      <button id="btn" type="submit">Continue</button>
+            <label for="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="you@domain.com"
+              autocomplete="email"
+              required
+            />
 
-      <p id="msg" class="hint" aria-live="polite"></p>
-      <p class="tiny">No spam. You can unsubscribe any time.</p>
-    </form>
+            <button id="btn" type="submit">Continue</button>
+
+            <!-- Keep for JS status updates, but hidden visually -->
+            <p id="msg" class="hint" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </div>
 
     <script>
       const f = document.getElementById("f");
@@ -104,13 +274,16 @@
           }
 
           setMsg("✅ You’re in. Redirecting…", "ok");
-
-          // If middleware redirects /login?next=..., send them there
           window.location.assign(next);
         } catch (err) {
           setMsg("❌ Network error. Try again.", "err");
           btn.disabled = false;
         }
+      });
+    </script>
+  </body>
+</html>
+
       });
     </script>
   </body>
