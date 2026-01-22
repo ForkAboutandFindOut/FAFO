@@ -274,6 +274,7 @@
           }
 
           setMsg("✅ You’re in. Redirecting…", "ok");
+          localStorage.setItem("fafo_access", "1");
           window.location.assign(next);
         } catch (err) {
           setMsg("❌ Network error. Try again.", "err");
