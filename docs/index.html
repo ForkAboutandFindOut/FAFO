@@ -1,14 +1,181 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>FAFO Podcast</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Fork About and Find Out</title>
+
+    <style>
+      :root{
+        --w98-bg: #008080;          /* Win98 teal desktop */
+        --w98-face: #c0c0c0;        /* window face */
+        --w98-shadow: #808080;      /* dark bevel */
+        --w98-hilite: #ffffff;      /* light bevel */
+        --w98-text: #000000;
+        --w98-title: #000080;       /* titlebar navy */
+        --w98-title-text: #ffffff;
+      }
+
+      html, body { height: 100%; }
+
+      body{
+        margin: 0;
+        background: var(--w98-bg);
+        color: var(--w98-text);
+        font-family: "MS Sans Serif", Tahoma, Verdana, Arial, sans-serif;
+        -webkit-font-smoothing: none;
+        -moz-osx-font-smoothing: auto;
+        text-rendering: geometricPrecision;
+      }
+
+      .wrap{
+        min-height: 100%;
+        display: grid;
+        place-items: center;
+        padding: 40px 16px;
+      }
+
+      /* Window */
+      .window{
+        width: min(760px, 100%);
+        background: var(--w98-face);
+        border: 2px solid var(--w98-hilite);
+        box-shadow:
+          inset -2px -2px 0 var(--w98-shadow),
+          inset  2px  2px 0 var(--w98-hilite),
+          2px 2px 0 #000;
+        background-image: linear-gradient(rgba(0,0,0,0.02), rgba(0,0,0,0.02));
+      }
+
+      /* Titlebar */
+      .titlebar{
+        background: var(--w98-title);
+        color: var(--w98-title-text);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 8px;
+        font-weight: 700;
+        user-select: none;
+      }
+
+      .titlebar .title{
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .titlebar-controls{
+        display: flex;
+        gap: 6px;
+      }
+
+      .ctrl{
+        width: 18px;
+        height: 18px;
+        background: var(--w98-face);
+        border: 2px solid var(--w98-hilite);
+        box-shadow:
+          inset -2px -2px 0 var(--w98-shadow),
+          inset  2px  2px 0 var(--w98-hilite);
+      }
+
+      /* Content */
+      .content{
+        padding: 18px 18px 20px;
+      }
+
+      .hero{
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: 18px;
+        align-items: center;
+      }
+
+      .logo{
+        width: 160px;
+        height: 160px;
+        border-radius: 14px;
+        background: #fff;
+        object-fit: cover;
+        image-rendering: pixelated;
+        border: 2px solid var(--w98-hilite);
+        box-shadow:
+          inset -2px -2px 0 var(--w98-shadow),
+          inset  2px  2px 0 var(--w98-hilite);
+      }
+
+      h1{
+        margin: 0 0 8px;
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1.1;
+      }
+
+      .sub{
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.35;
+      }
+
+      .coming{
+        margin: 14px 0 0;
+        display: inline-block;
+        padding: 8px 10px;
+        background: #fff;
+        border: 2px solid #000;
+        box-shadow:
+          inset 2px 2px 0 var(--w98-shadow),
+          inset -2px -2px 0 var(--w98-hilite);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      /* Responsive */
+      @media (max-width: 560px){
+        .hero{
+          grid-template-columns: 1fr;
+          text-align: left;
+        }
+        .logo{
+          width: 130px;
+          height: 130px;
+        }
+        h1{ font-size: 24px; }
+      }
+    </style>
   </head>
+
   <body>
-    <h1>Fork Around & Find Out</h1>
-    <p>Open podcast files, show notes, and transcripts.</p>
-    <p><a href="./feed.xml">RSS feed</a> (for podcast apps)</p>
-    <p>Episodes coming soon.</p>
+    <div class="wrap">
+      <div class="window" role="dialog" aria-label="FAFO Home">
+        <div class="titlebar">
+          <div class="title">Fork About and Find Out</div>
+          <div class="titlebar-controls" aria-hidden="true">
+            <div class="ctrl" title="Minimize"></div>
+            <div class="ctrl" title="Maximize"></div>
+            <div class="ctrl" title="Close"></div>
+          </div>
+        </div>
+
+        <div class="content">
+          <div class="hero">
+            <img class="logo" src="/assets/fafo-logo.png" alt="FAFO logo" />
+
+            <div>
+              <h1>Fork About and Find Out</h1>
+              <p class="sub">
+                Welcome to Fork About and Find Out; a project showcasing exceptional individuals in tech, AI and company creation.
+              </p>
+
+              <div class="coming">Episodes coming soon.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RSS intentionally hidden for now -->
   </body>
 </html>
