@@ -33,14 +33,28 @@
 
   <body>
     <h1>Get access</h1>
-    <p class="hint">Drop your email (and optionally your name). We’ll add you to the list and let you in.</p>
+    <p class="hint">Drop your email and name. We’ll add you to the list and let you in.</p>
 
     <form id="f">
-      <label for="name">Name (optional)</label>
-      <input id="name" name="name" type="text" placeholder="Ada Lovelace" autocomplete="name" />
+      <label for="name">Name</label>
+      <input
+        id="name"
+        name="name"
+        type="text"
+        placeholder="Ada Lovelace"
+        autocomplete="name"
+        required
+      />
 
       <label for="email">Email</label>
-      <input id="email" name="email" type="email" placeholder="you@domain.com" autocomplete="email" required />
+      <input
+        id="email"
+        name="email"
+        type="email"
+        placeholder="you@domain.com"
+        autocomplete="email"
+        required
+      />
 
       <button id="btn" type="submit">Continue</button>
 
