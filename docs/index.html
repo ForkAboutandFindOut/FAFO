@@ -1,6 +1,21 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script>
+  (function () {
+    try {
+      // If they haven’t “unlocked” access, send them to login
+      if (!localStorage.getItem("fafo_access")) {
+        const next = encodeURIComponent(location.pathname + location.search);
+        location.replace(`/login/?next=${next}`);
+      }
+    } catch (e) {
+      // If storage is blocked, still send to login
+      const next = encodeURIComponent(location.pathname + location.search);
+      location.replace(`/login/?next=${next}`);
+    }
+  })();
+</script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Fork About and Find Out</title>
