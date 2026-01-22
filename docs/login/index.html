@@ -3,225 +3,99 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>FAFO Login</title>
-
-    <!-- Pixel-ish fallback stack (we can swap to a real pixel font later if you want) -->
+    <title>Fork About & Find Out — Access</title>
     <style>
-      :root{
-        --win-bg: #008080;          /* classic teal desktop */
-        --win-face: #c0c0c0;        /* window grey */
-        --win-shadow: #808080;      /* dark bevel */
-        --win-highlight: #ffffff;   /* light bevel */
-        --win-text: #000;
-        --win-blue: #000080;        /* title bar blue */
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        max-width: 520px;
+        margin: 48px auto;
+        padding: 0 16px;
+        line-height: 1.35;
       }
-
-      html, body { height: 100%; }
-      body{
-        margin:0;
-        background: var(--win-bg);
-        font-family: "MS Sans Serif", Tahoma, Verdana, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-        color: var(--win-text);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding: 24px;
-      }
-
-      /* Window frame */
-      .window{
-        width: min(520px, 92vw);
-        background: var(--win-face);
-        border: 2px solid var(--win-shadow);
-        box-shadow:
-          0 0 0 2px var(--win-highlight) inset,
-          0 0 0 4px var(--win-face) inset;
-      }
-
-      /* Title bar */
-      .titlebar{
-        background: var(--win-blue);
-        color: #fff;
-        padding: 6px 8px;
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        font-weight: 700;
-        letter-spacing: 0.2px;
-        user-select:none;
-      }
-
-      .titlebar .controls{
-        display:flex; gap:4px;
-      }
-
-      .btn{
-        width: 18px;
-        height: 18px;
-        background: var(--win-face);
-        border: 2px solid var(--win-shadow);
-        box-shadow: 0 0 0 2px var(--win-highlight) inset;
-      }
-
-      .content{
-        padding: 16px;
-      }
-
-      .logo-wrap{
-        display:flex;
-        gap: 12px;
-        align-items:center;
-        margin-bottom: 12px;
-      }
-
-      .logo{
-        width: 80px;
-        height: auto;
-        image-rendering: pixelated;
-      }
-
-      h1{
-        font-size: 18px;
-        margin: 0 0 2px 0;
-      }
-      .hint{
-        margin: 0;
-        font-size: 13px;
-        color: #111;
-        opacity: 0.85;
-      }
-
-      label{
-        display:block;
-        margin-top: 12px;
-        font-size: 13px;
-      }
-
-      input{
+      h1 { margin: 0 0 8px; }
+      .hint { color: #666; font-size: 14px; margin: 0 0 16px; }
+      form { margin-top: 16px; }
+      label { display: block; font-size: 14px; color: #333; margin: 12px 0 6px; }
+      input, button {
         width: 100%;
-        padding: 10px 10px;
-        font-size: 14px;
-        margin-top: 6px;
-        background: #fff;
-        border: 2px solid #000;
-        box-shadow:
-          1px 1px 0 0 var(--win-highlight) inset,
-          -1px -1px 0 0 var(--win-shadow) inset;
+        padding: 12px;
+        font-size: 16px;
+        margin: 0;
+        box-sizing: border-box;
       }
-
-      .row{
-        display:flex;
-        gap: 10px;
-        align-items:center;
-        margin-top: 12px;
-      }
-
-      button{
-        flex: 1;
-        padding: 10px;
-        font-size: 14px;
-        background: var(--win-face);
-        border: 2px solid var(--win-shadow);
-        box-shadow: 0 0 0 2px var(--win-highlight) inset;
-        cursor: pointer;
-      }
-      button:active{
-        box-shadow: 0 0 0 2px var(--win-shadow) inset;
-        transform: translateY(1px);
-      }
-
-      #msg{
-        margin: 10px 0 0 0;
-        font-size: 13px;
-        min-height: 18px;
-      }
-      .ok{ color: #0a7a0a; }
-      .err{ color: #b00020; }
-
-      .footer{
-        margin-top: 14px;
-        font-size: 12px;
-        opacity: 0.8;
-      }
-
-      a{ color: #0000ee; }
+      button { margin-top: 14px; cursor: pointer; }
+      #msg { margin-top: 12px; font-size: 14px; }
+      .err { color: #b00020; }
+      .ok { color: #0a7a0a; }
+      .tiny { font-size: 12px; color: #777; margin-top: 14px; }
     </style>
   </head>
 
   <body>
-    <div class="window">
-      <div class="titlebar">
-        <div>Fork About and Find Out</div>
-        <div class="controls" aria-hidden="true">
-          <div class="btn"></div>
-          <div class="btn"></div>
-          <div class="btn"></div>
-        </div>
-      </div>
+    <h1>Get access</h1>
+    <p class="hint">Drop your email (and optionally your name). We’ll add you to the list and let you in.</p>
 
-      <div class="content">
-        <div class="logo-wrap">
-          <!-- ✅ change the src if your filename/path differs -->
-          <img class="logo" src="/assets/fafo-logo.png" alt="FAFO logo" />
-          <div>
-            <h1>Sign in</h1>
-            <p class="hint">We’ll email you a one-time sign-in link.</p>
-          </div>
-        </div>
+    <form id="f">
+      <label for="name">Name (optional)</label>
+      <input id="name" name="name" type="text" placeholder="Ada Lovelace" autocomplete="name" />
 
-        <form id="f">
-          <label for="email">Email address</label>
-          <input id="email" type="email" placeholder="you@domain.com" required autocomplete="email" />
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" placeholder="you@domain.com" autocomplete="email" required />
 
-          <div class="row">
-            <button type="submit" id="sendBtn">Send sign-in link</button>
-          </div>
+      <button id="btn" type="submit">Continue</button>
 
-          <p id="msg" class="hint"></p>
-          <div class="footer">
-            Having trouble? Try checking spam, or use a different email.
-          </div>
-        </form>
-      </div>
-    </div>
+      <p id="msg" class="hint" aria-live="polite"></p>
+      <p class="tiny">No spam. You can unsubscribe any time.</p>
+    </form>
 
-    <script type="module">
+    <script>
       const f = document.getElementById("f");
+      const nameEl = document.getElementById("name");
       const emailEl = document.getElementById("email");
       const msg = document.getElementById("msg");
-      const sendBtn = document.getElementById("sendBtn");
+      const btn = document.getElementById("btn");
 
-      function setMsg(text, cls) {
-        msg.textContent = text;
-        msg.className = cls ? cls : "hint";
+      const params = new URLSearchParams(window.location.search);
+      const next = params.get("next") || "/";
+
+      function setMsg(text, type) {
+        msg.textContent = text || "";
+        msg.className = type ? type : "hint";
       }
 
       f.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const email = emailEl.value.trim();
+        setMsg("Saving…", "hint");
+        btn.disabled = true;
 
-        sendBtn.disabled = true;
-        setMsg("Sending sign-in link…", "hint");
+        const payload = {
+          name: nameEl.value.trim(),
+          email: emailEl.value.trim()
+        };
 
         try {
-          const res = await fetch("/api/send-otp", {
+          const res = await fetch("/api/subscribe", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email }),
+            body: JSON.stringify(payload),
           });
 
-          if (!res.ok) {
-            const t = await res.text();
-            setMsg(t || "Something went wrong sending the email.", "err");
+          const data = await res.json().catch(() => ({}));
+
+          if (!res.ok || !data.ok) {
+            const err = data.error || data.details || "Something went wrong.";
+            setMsg("❌ " + err, "err");
+            btn.disabled = false;
             return;
           }
 
-          setMsg("✅ Check your email for the sign-in link.", "ok");
-          emailEl.blur();
+          setMsg("✅ You’re in. Redirecting…", "ok");
+
+          // If middleware redirects /login?next=..., send them there
+          window.location.assign(next);
         } catch (err) {
-          setMsg("Network error. Try again or switch network/VPN.", "err");
-        } finally {
-          sendBtn.disabled = false;
+          setMsg("❌ Network error. Try again.", "err");
+          btn.disabled = false;
         }
       });
     </script>
