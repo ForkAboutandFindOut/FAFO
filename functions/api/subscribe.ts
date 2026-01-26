@@ -112,7 +112,7 @@ headers.append(
 );
 
 // TEMP: prove deploy is live
-return new Response(JSON.stringify({ ok: true, v: "cookie-v3" }), {
+return new Response(JSON.stringify({ ok: true, v: "cookie-v3" }), { status: 200, headers });
   status: 200,
   headers,
 });
