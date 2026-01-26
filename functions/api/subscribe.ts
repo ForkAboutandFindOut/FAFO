@@ -81,16 +81,18 @@ export const onRequestPost: PagesFunction = async (context) => {
     return json({ ok: false, error: `Supabase insert failed (${res.status})`, details: text }, 502);
   }
 
-  const secret = (context.env.GATE_COOKIE_SECRET as string | undefined)?.trim();
-  if (!secret) return json({ ok: false, error: "Missing GATE_COOKIE_SECRET" }, 500);
+const secret = (context.env.GATE_COOKIE_SECRET as string | undefined)?.trim();
+if (!secret) return json({ ok: false, error: "Missing GATE_COOKIE_SECRET" }, 500);
 
-  const token = await makeGateToken(secret, email);
+const token = await makeGateToken(secret, email);
 
-  return new Response(JSON.stringify({ ok: true }), {
-    status: 200,
-    headers: {
-      "content-type": "application/json",
-      "set-cookie": `fafo_gate=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 24 * 180}`,
-    },
-  });
+const headers = new Headers();
+headers.set("content-type", "application/json");
+headers.set("cache-control", "no-store"); // avoid any caching weirdness
+headers.append(
+  "Set-Cookie",
+  `fafo_gate=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 24 * 180}`
+);
+
+return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
 
