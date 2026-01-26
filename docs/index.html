@@ -159,6 +159,55 @@
         }
         h1{ font-size: 24px; }
       }
+
+      /* Episode box */
+.episode{
+  margin-top: 14px;
+  background: #fff;
+  border: 2px solid #000;
+  box-shadow:
+    inset 2px 2px 0 var(--w98-shadow),
+    inset -2px -2px 0 var(--w98-hilite);
+  padding: 10px 12px;
+}
+
+.episode-title{
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.episode-meta{
+  font-size: 12px;
+  opacity: 0.9;
+  margin-bottom: 10px;
+}
+
+.episode-actions{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn{
+  display: inline-block;
+  padding: 6px 10px;
+  background: var(--w98-face);
+  color: var(--w98-text);
+  text-decoration: none;
+  border: 2px solid var(--w98-hilite);
+  box-shadow:
+    inset -2px -2px 0 var(--w98-shadow),
+    inset  2px  2px 0 var(--w98-hilite);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.btn:active{
+  box-shadow:
+    inset  2px  2px 0 var(--w98-shadow),
+    inset -2px -2px 0 var(--w98-hilite);
+}
     </style>
   </head>
 
@@ -184,7 +233,18 @@
                 Welcome to Fork About and Find Out; a project showcasing exceptional individuals in tech, AI and company creation.
               </p>
 
-              <div class="coming">Episodes coming soon.</div>
+             <div class="coming">Episode 1 is live.</div>
+
+                <div class="episode" role="group" aria-label="Latest episode">
+                  <div class="episode-title">Episode 1 — Leon Kuessner</div>
+                  <div class="episode-meta">Download the MP3 (requires access)</div>
+                
+                  <div class="episode-actions">
+                    <a class="btn" href="/api/episodes/ep001/download" download>
+                      Download MP3
+                    </a>
+                  </div>
+                </div>
             </div>
           </div>
         </div>
