@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Refreshing access…</title>
+    <script>
+      (function () {
+        const next = new URLSearchParams(location.search).get("next") || "/";
+        try {
+          localStorage.removeItem("fafo_access");
+        } catch (e) {}
+        location.replace(`/login/?next=${encodeURIComponent(next)}`);
+      })();
+    </script>
+  </head>
+  <body>Refreshing access…</body>
+</html>
