@@ -104,8 +104,5 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   );
 
   // TEMP debug body (remove v later)
-  return new Response(JSON.stringify({ ok: true, v: "cookie-v3" }), {
-    status: 200,
-    headers,
-  });
+ return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
 };
