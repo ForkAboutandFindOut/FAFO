@@ -106,10 +106,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   headers.set("cache-control", "no-store");
   headers.set("x-fafo-subscribe-version", "cookie-v3"); // debug: proves deploy
 
-  headers.append(
-    "Set-Cookie",
-    `fafo_gate=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 24 * 180}`
-  );
+headers.append(
+  "Set-Cookie",
+  `fafo_gate=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 24 * 180}`
+);
 
-  return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
-};
+// TEMP: prove deploy is live
+return new Response(JSON.stringify({ ok: true, v: "cookie-v3" }), {
+  status: 200,
+  headers,
+});
+
