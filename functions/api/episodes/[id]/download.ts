@@ -90,16 +90,25 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, params, env })
   const ok = await requireGate(request, env.GATE_COOKIE_SECRET);
   if (!ok) return new Response("Unauthorized", { status: 401 });
 
-  const id = String(params.id || "");
-  const ep = EPISODES.find((e) => e.id === id);
-  if (!ep) return new Response("Not found", { status: 404 });
+  const id = String(params.id || "").toLowerCase();
 
-  const head = await env.EPISODES_BUCKET.head(ep.r2_key);
+  // Only allow ep### ids (ep001, ep002, ...)
+  if (!/^ep\d{3}$/.test(id)) {
+    return new Response("Not found", { status: 404 });
+  }
+
+  // Prefer metadata from EPISODES if it exists, but don't require it
+  const ep = EPISODES.find((e) => String(e.id).toLowerCase() === id);
+
+  const r2Key = ep?.r2_key ?? `episodes/${id}.mp3`;
+  const filename = ep?.filename ?? `${id}.mp3`;
+
+  const head = await env.EPISODES_BUCKET.head(r2Key);
   if (!head) return new Response("Missing file", { status: 404 });
 
   const baseHeaders: Record<string, string> = {
     "Content-Type": "audio/mpeg",
-    "Content-Disposition": `attachment; filename="${ep.filename}"`,
+    "Content-Disposition": `attachment; filename="${filename}"`,
     "Accept-Ranges": "bytes",
     "Cache-Control": "private, no-store",
   };
@@ -110,7 +119,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, params, env })
     if (!r) return new Response("Range Not Satisfiable", { status: 416 });
 
     const length = r.end - r.start + 1;
-    const obj = await env.EPISODES_BUCKET.get(ep.r2_key, { range: { offset: r.start, length } });
+    const obj = await env.EPISODES_BUCKET.get(r2Key, { range: { offset: r.start, length } });
     if (!obj?.body) return new Response("Range Not Satisfiable", { status: 416 });
 
     return new Response(obj.body, {
@@ -123,7 +132,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, params, env })
     });
   }
 
-  const obj = await env.EPISODES_BUCKET.get(ep.r2_key);
+  const obj = await env.EPISODES_BUCKET.get(r2Key);
   if (!obj?.body) return new Response("Missing file", { status: 404 });
 
   return new Response(obj.body, {
@@ -134,3 +143,4 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, params, env })
     },
   });
 };
+
