@@ -71,10 +71,19 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const email = String(body?.email || "").trim().toLowerCase();
   const name = String(body?.name || "").trim();
 
+  // NEW: marketing opt-in + consent version
+  const marketingOptIn = !!body?.marketing_opt_in;
+  const consentVersionRaw = String(body?.consent_version || "").trim();
+  const consentVersion = consentVersionRaw || "login_updates_v1";
+
   if (!email || !email.includes("@")) return json({ ok: false, error: "Invalid email" }, 400);
   if (name.length > 120) return json({ ok: false, error: "Name too long" }, 400);
+  if (consentVersion.length > 64) return json({ ok: false, error: "Consent version too long" }, 400);
 
   const url = `${SUPABASE_URL}/rest/v1/mailing_list?on_conflict=email`;
+
+  const nowIso = new Date().toISOString();
+
   const res = await fetch(url, {
     method: "POST",
     headers: {
@@ -83,7 +92,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       authorization: `Bearer ${SERVICE_KEY}`,
       prefer: "resolution=merge-duplicates,return=minimal",
     },
-    body: JSON.stringify({ email, name: name || null }),
+    body: JSON.stringify({
+      email,
+      name: name || null,
+
+      // NEW columns
+      marketing_opt_in: marketingOptIn,
+      consent_version: consentVersion,
+
+      // If they opt-in now, store a timestamp; if not, leave it null.
+      // (If you’d rather preserve old opt-in timestamps, tell me and I’ll tweak this.)
+      marketing_opt_in_at: marketingOptIn ? nowIso : null,
+    }),
   });
 
   if (!res.ok) {
@@ -96,13 +116,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const headers = new Headers();
   headers.set("content-type", "application/json; charset=utf-8");
   headers.set("cache-control", "no-store");
-  headers.set("x-fafo-subscribe-version", "cookie-v3"); // debug: proves deploy
+  headers.set("x-fafo-subscribe-version", "cookie-v4"); // bump for deploy debug
 
   headers.append(
     "Set-Cookie",
     `fafo_gate=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 24 * 180}`
   );
 
-  // TEMP debug body (remove v later)
- return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
+  return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
 };
