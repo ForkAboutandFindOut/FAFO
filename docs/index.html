@@ -43,6 +43,24 @@
         text-rendering: geometricPrecision;
       }
 
+     .intro{
+          font-size: 20px;
+          font-weight: 700;
+          line-height: 1.35;
+          margin: 10px 0 18px;
+        }  
+
+    .guest-desc{
+      font-size: 14px;
+      font-weight: 600;
+      margin: 6px 0 10px;
+      line-height: 1.35;
+      max-width: 520px; /* optional: stops it running too wide */
+    }
+    .ep-title{
+      font-weight: 800;
+    }
+      
       .wrap{
         min-height: 100%;
         display: grid;
@@ -228,14 +246,17 @@
             <img class="logo" src="/assets/fafo-logo.png" alt="FAFO logo" />
 
             <div>
-              <h1>Fork About and Find Out</h1>
-              <p class="sub">
+              <p class="intro">
                 Welcome to Fork About and Find Out; a project showcasing exceptional individuals in tech, AI and company creation.
               </p>
 
 <div class="episode" role="group" aria-label="Episode 1">
   <div class="episode-title">Episode 1 — Leon Kuessner</div>
   <div class="episode-meta">Download the MP3</div>
+
+    <p class="guest-desc">
+    Comp Sci student at Imperial | Incoming Citadel FIM Desk Analyst
+  </p>
 
   <div class="episode-actions">
     <a class="btn" href="/api/episodes/ep001/download">Download MP3</a>
@@ -245,6 +266,10 @@
 <div class="episode" role="group" aria-label="Episode 2">
   <div class="episode-title">Episode 2 — Gabriel Szeto</div>
   <div class="episode-meta">Download the MP3</div>
+
+      <p class="guest-desc">
+    Building AMOU
+  </p>
 
   <div class="episode-actions">
     <a class="btn" href="/api/episodes/ep002/download">Download MP3</a>
