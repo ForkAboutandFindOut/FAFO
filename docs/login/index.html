@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Fork About & Find Out — Access</title>
+    <title>Fork About &amp; Find Out — Access</title>
 
     <style>
       :root{
@@ -36,43 +36,6 @@
         padding: 40px 16px;
       }
 
-      .fineprint{
-        font-size: 12px;
-        line-height: 1.35;
-        margin: 10px 0 0;
-        color: #111;
-      }
-    
-      .checkrow{
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        margin-top: 12px;
-        font-size: 13px;
-      }
-    
-      .checkrow input[type="checkbox"]{
-        width: 18px;
-        height: 18px;
-        margin-top: 2px;
-        flex: 0 0 auto;
-    
-        /* match win98-ish input bevel */
-        background: #fff;
-        border: 2px solid #000;
-        box-shadow:
-          inset 2px 2px 0 var(--w98-shadow),
-          inset -2px -2px 0 var(--w98-hilite);
-      }
-    
-      .checkrow label{
-        margin: 0;            /* override your label default */
-        font-size: 13px;
-        line-height: 1.3;
-        cursor: pointer;
-        user-select: none;
-      }
-      
       /* Win98 window */
       .window{
         width: min(520px, 100%);
@@ -82,6 +45,7 @@
           inset -2px -2px 0 var(--w98-shadow),
           inset  2px  2px 0 var(--w98-hilite),
           2px 2px 0 #000;
+        background-image: linear-gradient(rgba(0,0,0,0.02), rgba(0,0,0,0.02));
       }
 
       /* Title bar */
@@ -165,7 +129,8 @@
         margin: 12px 0 6px;
       }
 
-      input{
+      input[type="text"],
+      input[type="email"]{
         width: 100%;
         box-sizing: border-box;
         padding: 10px;
@@ -177,16 +142,40 @@
           inset -2px -2px 0 var(--w98-hilite);
       }
 
-    <p class="fineprint">
-      We’ll only email you about access. Updates are optional.
-    </p>
-    
-    <div class="checkrow">
-      <input id="updates" name="updates" type="checkbox" />
-      <label for="updates">
-        Send me updates about new interviews and events.
-      </label>
-    </div>
+      .fineprint{
+        font-size: 12px;
+        line-height: 1.35;
+        margin: 10px 0 0;
+        color: #111;
+      }
+
+      .checkrow{
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 12px;
+        font-size: 13px;
+      }
+
+      .checkrow input[type="checkbox"]{
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        flex: 0 0 auto;
+        background: #fff;
+        border: 2px solid #000;
+        box-shadow:
+          inset 2px 2px 0 var(--w98-shadow),
+          inset -2px -2px 0 var(--w98-hilite);
+      }
+
+      .checkrow label{
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.3;
+        cursor: pointer;
+        user-select: none;
+      }
 
       button{
         width: 100%;
@@ -213,20 +202,15 @@
         cursor: not-allowed;
       }
 
-      /* Hidden message area: keep functionality, but don't show UI text unless needed */
       #msg{
         margin: 10px 0 0;
-        height: 18px;
+        min-height: 18px;
         overflow: visible;
         padding: 0;
+        font-size: 13px;
       }
       .err{ color: #b00020; }
       .ok{ color: #0a7a0a; }
-
-      /* Optional: subtle “screen” texture */
-      .window{
-        background-image: linear-gradient(rgba(0,0,0,0.02), rgba(0,0,0,0.02));
-      }
     </style>
   </head>
 
@@ -271,16 +255,19 @@
               required
             />
 
-                      <div class="checkrow">
-            <input id="updates" name="updates" type="checkbox" />
-            <label for="updates">
-              Send me updates about new interviews and events.
-            </label>
-          </div>
+            <p class="fineprint">
+              We’ll only email you about access. Updates are optional.
+            </p>
+
+            <div class="checkrow">
+              <input id="updates" name="updates" type="checkbox" />
+              <label for="updates">
+                Send me updates about new interviews and events.
+              </label>
+            </div>
 
             <button id="btn" type="submit">Continue</button>
 
-            <!-- Keep for JS status updates, but hidden visually -->
             <p id="msg" class="hint" aria-live="polite"></p>
           </form>
         </div>
@@ -291,64 +278,61 @@
       const f = document.getElementById("f");
       const nameEl = document.getElementById("name");
       const emailEl = document.getElementById("email");
-      const updatesEl = document.getElementById("updates"); // may be null if you forgot the checkbox
+      const updatesEl = document.getElementById("updates");
       const msg = document.getElementById("msg");
       const btn = document.getElementById("btn");
-    
+
       const params = new URLSearchParams(window.location.search);
       const next = params.get("next") || "/";
-    
+
       function setMsg(text, type) {
         msg.textContent = text || "";
         msg.className = type ? type : "hint";
       }
-    
+
       f.addEventListener("submit", async (e) => {
         e.preventDefault();
         setMsg("Saving…", "hint");
         btn.disabled = true;
-    
-        // Ensure we never “freeze” forever
+
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 12000);
-    
+
         try {
           const payload = {
             name: nameEl.value.trim(),
             email: emailEl.value.trim(),
-            marketing_opt_in: !!updatesEl?.checked,   // SAFE even if checkbox missing
+            marketing_opt_in: !!updatesEl?.checked,
             consent_version: "login_updates_v1",
           };
-    
+
           const res = await fetch("/api/subscribe", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
             signal: controller.signal,
           });
-    
+
           const data = await res.json().catch(() => ({}));
-    
+
           if (!res.ok || !data.ok) {
             const err = data.error || data.details || "Something went wrong.";
             setMsg("❌ " + err, "err");
             return;
           }
-    
+
           setMsg("✅ You’re in. Redirecting…", "ok");
           localStorage.setItem("fafo_access", "1");
           window.location.assign(next);
         } catch (err) {
           console.error(err);
-          const isAbort = err && (err.name === "AbortError");
+          const isAbort = err && err.name === "AbortError";
           setMsg(isAbort ? "❌ Request timed out. Try again." : "❌ Network/JS error. Check console.", "err");
         } finally {
           clearTimeout(timeout);
-          // If we redirected, this won’t matter; if we errored, it prevents “freeze”
           btn.disabled = false;
         }
       });
     </script>
   </body>
 </html>
-
