@@ -215,9 +215,9 @@
 
       /* Hidden message area: keep functionality, but don't show UI text unless needed */
       #msg{
-        margin: 0;
-        height: 0;
-        overflow: hidden;
+        margin: 10px 0 0;
+        height: 18px;
+        overflow: visible;
         padding: 0;
       }
       .err{ color: #b00020; }
@@ -271,6 +271,13 @@
               required
             />
 
+                      <div class="checkrow">
+            <input id="updates" name="updates" type="checkbox" />
+            <label for="updates">
+              Send me occasional updates about new interviews and events (you can unsubscribe anytime).
+            </label>
+          </div>
+
             <button id="btn" type="submit">Continue</button>
 
             <!-- Keep for JS status updates, but hidden visually -->
@@ -284,52 +291,60 @@
       const f = document.getElementById("f");
       const nameEl = document.getElementById("name");
       const emailEl = document.getElementById("email");
+      const updatesEl = document.getElementById("updates"); // may be null if you forgot the checkbox
       const msg = document.getElementById("msg");
       const btn = document.getElementById("btn");
-      const updatesEl = document.getElementById("updates");
-
+    
       const params = new URLSearchParams(window.location.search);
       const next = params.get("next") || "/";
-
+    
       function setMsg(text, type) {
         msg.textContent = text || "";
         msg.className = type ? type : "hint";
       }
-
+    
       f.addEventListener("submit", async (e) => {
         e.preventDefault();
         setMsg("Saving…", "hint");
         btn.disabled = true;
-
-      const payload = {
-        name: nameEl.value.trim(),
-        email: emailEl.value.trim(),
-        marketing_opt_in: !!updatesEl.checked,
-        consent_version: "login_updates_v1"
-      };
-
-
+    
+        // Ensure we never “freeze” forever
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 12000);
+    
         try {
+          const payload = {
+            name: nameEl.value.trim(),
+            email: emailEl.value.trim(),
+            marketing_opt_in: !!updatesEl?.checked,   // SAFE even if checkbox missing
+            consent_version: "login_updates_v1",
+          };
+    
           const res = await fetch("/api/subscribe", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
+            signal: controller.signal,
           });
-
+    
           const data = await res.json().catch(() => ({}));
-
+    
           if (!res.ok || !data.ok) {
             const err = data.error || data.details || "Something went wrong.";
             setMsg("❌ " + err, "err");
-            btn.disabled = false;
             return;
           }
-
+    
           setMsg("✅ You’re in. Redirecting…", "ok");
           localStorage.setItem("fafo_access", "1");
           window.location.assign(next);
         } catch (err) {
-          setMsg("❌ Network error. Try again.", "err");
+          console.error(err);
+          const isAbort = err && (err.name === "AbortError");
+          setMsg(isAbort ? "❌ Request timed out. Try again." : "❌ Network/JS error. Check console.", "err");
+        } finally {
+          clearTimeout(timeout);
+          // If we redirected, this won’t matter; if we errored, it prevents “freeze”
           btn.disabled = false;
         }
       });
