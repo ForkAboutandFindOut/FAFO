@@ -177,19 +177,6 @@
         line-height: 1.35;
       }
 
-      .coming{
-        margin: 14px 0 0;
-        display: inline-block;
-        padding: 8px 10px;
-        background: #fff;
-        border: 2px solid #000;
-        box-shadow:
-          inset 2px 2px 0 var(--w98-shadow),
-          inset -2px -2px 0 var(--w98-hilite);
-        font-size: 13px;
-        font-weight: 700;
-      }
-
       /* Responsive */
       @media (max-width: 560px){
         .hero{
@@ -203,54 +190,77 @@
         h1{ font-size: 24px; }
       }
 
-      /* Episode box */
-.episode{
-  margin-top: 14px;
-  background: #fff;
-  border: 2px solid #000;
-  box-shadow:
-    inset 2px 2px 0 var(--w98-shadow),
-    inset -2px -2px 0 var(--w98-hilite);
-  padding: 10px 12px;
-}
+      .episodes-grid{
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
+        margin-top: 18px;
+      }
 
-.episode-title{
-  font-weight: 700;
-  font-size: 13px;
-  margin-bottom: 4px;
-}
+      .episode-card{
+        background: var(--w98-face);
+        border: 2px solid var(--w98-hilite);
+        box-shadow:
+          inset -2px -2px 0 var(--w98-shadow),
+          inset  2px  2px 0 var(--w98-hilite),
+          2px 2px 0 #000;
+        padding: 8px;
+        display: grid;
+        gap: 8px;
+      }
 
-.episode-meta{
-  font-size: 12px;
-  opacity: 0.9;
-  margin-bottom: 10px;
-}
+      .episode-title{
+        font-weight: 700;
+        font-size: 13px;
+        margin: 0;
+      }
 
-.episode-actions{
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
+      .episode-portrait-link{
+        display: block;
+        border: 2px solid #000;
+        background: #bdbdbd;
+        box-shadow:
+          inset 2px 2px 0 var(--w98-shadow),
+          inset -2px -2px 0 var(--w98-hilite);
+      }
 
-.btn{
-  display: inline-block;
-  padding: 6px 10px;
-  background: var(--w98-face);
-  color: var(--w98-text);
-  text-decoration: none;
-  border: 2px solid var(--w98-hilite);
-  box-shadow:
-    inset -2px -2px 0 var(--w98-shadow),
-    inset  2px  2px 0 var(--w98-hilite);
-  font-weight: 700;
-  font-size: 12px;
-}
+      .episode-portrait{
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        display: block;
+      }
 
-.btn:active{
-  box-shadow:
-    inset  2px  2px 0 var(--w98-shadow),
-    inset -2px -2px 0 var(--w98-hilite);
-}
+      .episode-placeholder{
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        background: #bdbdbd;
+      }
+
+      .episode-details{
+        display: none;
+        background: #fff;
+        border: 2px solid #000;
+        box-shadow:
+          inset 2px 2px 0 var(--w98-shadow),
+          inset -2px -2px 0 var(--w98-hilite);
+        padding: 8px;
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .episode-card.open .episode-details{
+        display: block;
+      }
+
+      .episode-download{
+        display: inline-block;
+        margin-top: 6px;
+        font-weight: 700;
+        font-size: 12px;
+        color: #000080;
+        text-decoration: underline;
+      }
     </style>
   </head>
 
@@ -277,6 +287,9 @@
           >
             <source src="/assets/fafo-homepage.webm" type="video/webm" />
           </video>
+          <p class="intro">
+            Welcome to Fork About and Find Out; a project showcasing exceptional individuals in tech, AI and company creation.
+          </p>
         </div>
       </div>
     </header>
@@ -297,66 +310,106 @@
             <img class="logo" src="/assets/fafo-logo.png" alt="FAFO logo" />
 
             <div>
-              <p class="intro">
-                Welcome to Fork About and Find Out; a project showcasing exceptional individuals in tech, AI and company creation.
-              </p>
-
-              <div class="episode" role="group" aria-label="Episode 4">
-  <div class="episode-title">Episode 4 — Tim Issenmann</div>
-
-      <p class="guest-desc">
-    Building Newgrain
-  </p>
-
-  <div class="episode-actions">
-    <a class="btn" href="/api/episodes/ep004/download">Download MP3</a>
-  </div>
-</div>
-
-              <div class="episode" role="group" aria-label="Episode 3">
-  <div class="episode-title">Episode 3 — Will Lockwood</div>
-
-      <p class="guest-desc">
-    GM at Sportas
-  </p>
-
-  <div class="episode-actions">
-    <a class="btn" href="/api/episodes/ep003/download">Download MP3</a>
-  </div>
-</div>
-
-<div class="episode" role="group" aria-label="Episode 2">
-  <div class="episode-title">Episode 2 — Gabriel Szeto</div>
-
-      <p class="guest-desc">
-    Building AMOU
-  </p>
-
-  <div class="episode-actions">
-    <a class="btn" href="/api/episodes/ep002/download">Download MP3</a>
-  </div>
-</div>              
-              
-<div class="episode" role="group" aria-label="Episode 1">
-  <div class="episode-title">Episode 1 — Leon Kuessner</div>
-
-    <p class="guest-desc">
-    2024 IC Hack Winner
-  </p>
-
-  <div class="episode-actions">
-    <a class="btn" href="/api/episodes/ep001/download">Download MP3</a>
-  </div>
-</div>
-
-                    </a>
-                  </div>
-                </div>
+              <p class="sub">Click a portrait to reveal the episode and download.</p>
             </div>
+          </div>
+
+          <div class="episodes-grid" aria-label="Episodes">
+            <article class="episode-card" data-episode>
+              <a
+                class="episode-portrait-link"
+                href="/api/episodes/ep004/download"
+                download
+                aria-label="Download Episode 4"
+              >
+                <div class="episode-placeholder" aria-hidden="true"></div>
+              </a>
+              <h3 class="episode-title">Episode 4 — Tim Issenmann</h3>
+              <div class="episode-details">
+                <div>Placeholder description.</div>
+                <a class="episode-download" href="/api/episodes/ep004/download" download>
+                  Click to download
+                </a>
+              </div>
+            </article>
+
+            <article class="episode-card" data-episode>
+              <a
+                class="episode-portrait-link"
+                href="/api/episodes/ep003/download"
+                download
+                aria-label="Download Episode 3"
+              >
+                <div class="episode-placeholder" aria-hidden="true"></div>
+              </a>
+              <h3 class="episode-title">Episode 3 — Will Lockwood</h3>
+              <div class="episode-details">
+                <div>Placeholder description.</div>
+                <a class="episode-download" href="/api/episodes/ep003/download" download>
+                  Click to download
+                </a>
+              </div>
+            </article>
+
+            <article class="episode-card" data-episode>
+              <a
+                class="episode-portrait-link"
+                href="/api/episodes/ep002/download"
+                download
+                aria-label="Download Episode 2"
+              >
+                <div class="episode-placeholder" aria-hidden="true"></div>
+              </a>
+              <h3 class="episode-title">Episode 2 — Gabriel Szeto</h3>
+              <div class="episode-details">
+                <div>Placeholder description.</div>
+                <a class="episode-download" href="/api/episodes/ep002/download" download>
+                  Click to download
+                </a>
+              </div>
+            </article>
+
+            <article class="episode-card" data-episode>
+              <a
+                class="episode-portrait-link"
+                href="/api/episodes/ep001/download"
+                download
+                aria-label="Download Episode 1"
+              >
+                <img
+                  class="episode-portrait"
+                  src="/assets/LeonKuessner.png"
+                  alt="Portrait of Leon Kuessner"
+                />
+              </a>
+              <h3 class="episode-title">Episode 1 — Leon Kuessner</h3>
+              <div class="episode-details">
+                <div>Placeholder description.</div>
+                <a class="episode-download" href="/api/episodes/ep001/download" download>
+                  Click to download
+                </a>
+              </div>
+            </article>
           </div>
         </div>
       </div>
     </div>
+
+    <script>
+      const episodeCards = Array.from(document.querySelectorAll("[data-episode]"));
+
+      episodeCards.forEach((card) => {
+        const trigger = card.querySelector(".episode-portrait-link");
+        if (!trigger) return;
+
+        trigger.addEventListener("click", () => {
+          episodeCards.forEach((other) => {
+            if (other !== card) other.classList.remove("open");
+          });
+          card.classList.toggle("open");
+        });
+      });
+    </script>
 
     <!-- RSS intentionally hidden for now -->
   </body>
