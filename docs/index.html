@@ -171,7 +171,7 @@
 
       .episodes-grid{
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 14px;
         margin-top: 18px;
         padding: 0 16px 40px;
@@ -188,7 +188,7 @@
       }
 
       .episode-title{
-        font-weight: 700;
+        font-weight: 800;
         font-size: 13px;
         margin: 0;
       }
@@ -200,42 +200,78 @@
         box-shadow:
           inset 2px 2px 0 var(--w98-shadow),
           inset -2px -2px 0 var(--w98-hilite);
+        position: relative;
+        overflow: hidden;
       }
 
       .episode-portrait{
         width: 100%;
-        aspect-ratio: 1 / 1;
+        aspect-ratio: 3 / 4;
         object-fit: cover;
         display: block;
       }
 
       .episode-placeholder{
         width: 100%;
-        aspect-ratio: 1 / 1;
+        aspect-ratio: 3 / 4;
         background: #bdbdbd;
+      }
+
+      .episode-overlay{
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 8px 10px;
+        background: linear-gradient(transparent, rgba(0,0,0,0.6));
+      }
+
+      .episode-overlay-text{
+        color: #ffffff;
+        font-weight: 800;
+        text-shadow:
+          -1px -1px 0 #000000,
+          1px -1px 0 #000000,
+          -1px 1px 0 #000000,
+          1px 1px 0 #000000;
+        line-height: 1.2;
       }
 
       .episode-details{
         display: none;
+      }
+
+      .episode-tooltip{
+        position: fixed;
+        z-index: 10;
+        max-width: 240px;
         background: #fff;
         border: 2px solid #000;
         box-shadow:
           inset 2px 2px 0 var(--w98-shadow),
-          inset -2px -2px 0 var(--w98-hilite);
+          inset -2px -2px 0 var(--w98-hilite),
+          2px 2px 0 #000;
         padding: 8px;
         font-size: 12px;
         line-height: 1.35;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 120ms ease;
       }
 
-      .episode-card:hover .episode-details{
-        display: block;
+      .episode-tooltip.show{
+        opacity: 1;
       }
 
-      .episode-download{
+      .episode-tooltip-title{
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      .episode-tooltip-link{
         display: inline-block;
         margin-top: 6px;
         font-weight: 700;
-        font-size: 12px;
         color: #000080;
         text-decoration: underline;
       }
@@ -275,7 +311,13 @@
     <p class="sub">Hover a portrait to reveal the episode and download.</p>
 
     <div class="episodes-grid" aria-label="Episodes">
-            <article class="episode-card" data-episode>
+            <article
+              class="episode-card"
+              data-episode
+              data-title="Episode 4 — Tim Issenmann"
+              data-desc="Placeholder description."
+              data-download="/api/episodes/ep004/download"
+            >
               <a
                 class="episode-portrait-link"
                 href="/api/episodes/ep004/download"
@@ -283,17 +325,19 @@
                 aria-label="Download Episode 4"
               >
                 <div class="episode-placeholder" aria-hidden="true"></div>
+                <div class="episode-overlay">
+                  <div class="episode-overlay-text">Episode 4 — Tim Issenmann</div>
+                </div>
               </a>
-              <h3 class="episode-title">Episode 4 — Tim Issenmann</h3>
-              <div class="episode-details">
-                <div>Placeholder description.</div>
-                <a class="episode-download" href="/api/episodes/ep004/download" download>
-                  Click to download
-                </a>
-              </div>
             </article>
 
-            <article class="episode-card" data-episode>
+            <article
+              class="episode-card"
+              data-episode
+              data-title="Episode 3 — Will Lockwood"
+              data-desc="Placeholder description."
+              data-download="/api/episodes/ep003/download"
+            >
               <a
                 class="episode-portrait-link"
                 href="/api/episodes/ep003/download"
@@ -301,17 +345,19 @@
                 aria-label="Download Episode 3"
               >
                 <div class="episode-placeholder" aria-hidden="true"></div>
+                <div class="episode-overlay">
+                  <div class="episode-overlay-text">Episode 3 — Will Lockwood</div>
+                </div>
               </a>
-              <h3 class="episode-title">Episode 3 — Will Lockwood</h3>
-              <div class="episode-details">
-                <div>Placeholder description.</div>
-                <a class="episode-download" href="/api/episodes/ep003/download" download>
-                  Click to download
-                </a>
-              </div>
             </article>
 
-            <article class="episode-card" data-episode>
+            <article
+              class="episode-card"
+              data-episode
+              data-title="Episode 2 — Gabriel Szeto"
+              data-desc="Placeholder description."
+              data-download="/api/episodes/ep002/download"
+            >
               <a
                 class="episode-portrait-link"
                 href="/api/episodes/ep002/download"
@@ -319,17 +365,19 @@
                 aria-label="Download Episode 2"
               >
                 <div class="episode-placeholder" aria-hidden="true"></div>
+                <div class="episode-overlay">
+                  <div class="episode-overlay-text">Episode 2 — Gabriel Szeto</div>
+                </div>
               </a>
-              <h3 class="episode-title">Episode 2 — Gabriel Szeto</h3>
-              <div class="episode-details">
-                <div>Placeholder description.</div>
-                <a class="episode-download" href="/api/episodes/ep002/download" download>
-                  Click to download
-                </a>
-              </div>
             </article>
 
-            <article class="episode-card" data-episode>
+            <article
+              class="episode-card"
+              data-episode
+              data-title="Episode 1 — Leon Kuessner"
+              data-desc="Placeholder description."
+              data-download="/api/episodes/ep001/download"
+            >
               <a
                 class="episode-portrait-link"
                 href="/api/episodes/ep001/download"
@@ -341,16 +389,58 @@
                   src="/assets/LeonKuessner.png"
                   alt="Portrait of Leon Kuessner"
                 />
+                <div class="episode-overlay">
+                  <div class="episode-overlay-text">Episode 1 — Leon Kuessner</div>
+                </div>
               </a>
-              <h3 class="episode-title">Episode 1 — Leon Kuessner</h3>
-              <div class="episode-details">
-                <div>Placeholder description.</div>
-                <a class="episode-download" href="/api/episodes/ep001/download" download>
-                  Click to download
-                </a>
-              </div>
             </article>
     </div>
+
+    <div class="episode-tooltip" id="episodeTooltip" aria-hidden="true">
+      <div class="episode-tooltip-title" id="episodeTooltipTitle"></div>
+      <div id="episodeTooltipDesc"></div>
+      <a class="episode-tooltip-link" id="episodeTooltipLink" href="#" download>
+        Click to download
+      </a>
+    </div>
+
+    <script>
+      const tooltip = document.getElementById("episodeTooltip");
+      const tooltipTitle = document.getElementById("episodeTooltipTitle");
+      const tooltipDesc = document.getElementById("episodeTooltipDesc");
+      const tooltipLink = document.getElementById("episodeTooltipLink");
+      const cards = Array.from(document.querySelectorAll("[data-episode]"));
+
+      function setTooltipContent(card) {
+        tooltipTitle.textContent = card.dataset.title || "";
+        tooltipDesc.textContent = card.dataset.desc || "";
+        tooltipLink.href = card.dataset.download || "#";
+      }
+
+      function positionTooltip(e) {
+        const offset = 14;
+        const x = e.clientX + offset;
+        const y = e.clientY + offset;
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top = `${y}px`;
+      }
+
+      cards.forEach((card) => {
+        card.addEventListener("mouseenter", (e) => {
+          setTooltipContent(card);
+          positionTooltip(e);
+          tooltip.classList.add("show");
+          tooltip.setAttribute("aria-hidden", "false");
+        });
+
+        card.addEventListener("mousemove", positionTooltip);
+
+        card.addEventListener("mouseleave", () => {
+          tooltip.classList.remove("show");
+          tooltip.setAttribute("aria-hidden", "true");
+        });
+      });
+    </script>
 
     <!-- RSS intentionally hidden for now -->
   </body>
