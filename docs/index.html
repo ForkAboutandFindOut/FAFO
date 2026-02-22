@@ -20,6 +20,18 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Fork About and Find Out</title>
 
+    .hero-spin-wrap{
+      display:flex;
+      justify-content:center;
+      margin: 18px 0 14px;
+    }
+    
+    .hero-spin{
+      width: min(640px, 92vw); /* big but responsive */
+      height: auto;
+      display:block;
+    }
+    
     <style>
       :root{
         --w98-bg: #008080;          /* Win98 teal desktop */
@@ -230,6 +242,20 @@
   </head>
 
   <body>
+
+<header class="hero-spin-wrap">
+  <video
+    class="hero-spin"
+    autoplay
+    loop
+    muted
+    playsinline
+    preload="metadata"
+  >
+    <source src="/assets/spinlogo.mp4" type="video/mp4" />
+  </video>
+</header>
+    
     <div class="wrap">
       <div class="window" role="dialog" aria-label="FAFO Home">
         <div class="titlebar">
