@@ -38,7 +38,7 @@
 
       /* Win98 window */
       .window{
-        width: min(520px, 100%);
+        width: min(600px, 100%);
         background: var(--w98-face);
         border: 2px solid var(--w98-hilite);
         box-shadow:
@@ -101,6 +101,18 @@
         margin-bottom: 12px;
       }
 
+      .spin-logo{
+        width: 56px;
+        height: 56px;
+        border-radius: 6px;
+        background: var(--w98-face);
+        object-fit: cover;
+        border: 2px solid var(--w98-hilite);
+        box-shadow:
+          inset -2px -2px 0 var(--w98-shadow),
+          inset  2px  2px 0 var(--w98-hilite);
+      }
+
       .logo{
         width: 56px;
         height: 56px;
@@ -158,8 +170,8 @@
       }
 
       .checkrow input[type="checkbox"]{
-        width: 18px;
-        height: 18px;
+        width: 22px;
+        height: 22px;
         margin-top: 2px;
         flex: 0 0 auto;
         background: #fff;
@@ -171,7 +183,7 @@
 
       .checkrow label{
         margin: 0;
-        font-size: 13px;
+        font-size: 14px;
         line-height: 1.3;
         cursor: pointer;
         user-select: none;
@@ -235,7 +247,15 @@
 
         <div class="content">
           <div class="header">
-            <img class="logo" src="/assets/fafo-logo.png" alt="FAFO logo" />
+            <video
+              class="spin-logo"
+              src="/assets/fafo-spin.mp4"
+              autoplay
+              loop
+              muted
+              playsinline
+              aria-label="FAFO spinning logo"
+            ></video>
             <h1>Get access</h1>
           </div>
 
@@ -263,7 +283,7 @@
             <div class="checkrow">
               <input id="updates" name="updates" type="checkbox" />
               <label for="updates">
-                Send me updates about new interviews and events.
+                sign up to join the FAFO mailing list 🍴
               </label>
             </div>
 
