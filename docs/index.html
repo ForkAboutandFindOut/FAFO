@@ -20,18 +20,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Fork About and Find Out</title>
 
-    .hero-spin-wrap{
-      display:flex;
-      justify-content:center;
-      margin: 18px 0 14px;
-    }
-    
-    .hero-spin{
-      width: min(640px, 92vw); /* big but responsive */
-      height: auto;
-      display:block;
-    }
-    
     <style>
       :root{
         --w98-bg: #008080;          /* Win98 teal desktop */
@@ -53,6 +41,31 @@
         -webkit-font-smoothing: none;
         -moz-osx-font-smoothing: auto;
         text-rendering: geometricPrecision;
+      }
+
+      .hero-wrap{
+        display: flex;
+        justify-content: center;
+        padding: 24px 16px 0;
+      }
+
+      .hero-window{
+        width: min(760px, 100%);
+      }
+
+      .hero-content{
+        padding: 12px;
+      }
+
+      .hero-spin{
+        width: 100%;
+        height: auto;
+        display: block;
+        background: var(--w98-face);
+        border: 2px solid var(--w98-hilite);
+        box-shadow:
+          inset -2px -2px 0 var(--w98-shadow),
+          inset  2px  2px 0 var(--w98-hilite);
       }
 
      .intro{
@@ -243,18 +256,30 @@
 
   <body>
 
-<header class="hero-spin-wrap">
-  <video
-    class="hero-spin"
-    autoplay
-    loop
-    muted
-    playsinline
-    preload="metadata"
-  >
-    <source src="/assets/spinlogo.mp4" type="video/mp4" />
-  </video>
-</header>
+    <header class="hero-wrap">
+      <div class="window hero-window" role="region" aria-label="FAFO Logo">
+        <div class="titlebar">
+          <div class="title">Fork About and Find Out</div>
+          <div class="titlebar-controls" aria-hidden="true">
+            <div class="ctrl" title="Minimize"></div>
+            <div class="ctrl" title="Maximize"></div>
+            <div class="ctrl" title="Close"></div>
+          </div>
+        </div>
+        <div class="hero-content">
+          <video
+            class="hero-spin"
+            autoplay
+            loop
+            muted
+            playsinline
+            preload="metadata"
+          >
+            <source src="/assets/fafo-homepage.webm" type="video/webm" />
+          </video>
+        </div>
+      </div>
+    </header>
     
     <div class="wrap">
       <div class="window" role="dialog" aria-label="FAFO Home">
