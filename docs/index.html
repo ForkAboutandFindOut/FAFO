@@ -21,6 +21,14 @@
     <title>Fork About and Find Out</title>
 
     <style>
+      @font-face{
+        font-family: "Pixel Operator 8";
+        src: url("/assets/PixelOperator8.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
       :root{
         --w98-bg: #008080;          /* Win98 teal desktop */
         --w98-face: #c0c0c0;        /* window face */
@@ -44,7 +52,7 @@
         text-rendering: geometricPrecision;
       }
 
-      a, button, input, label, video{
+      *{
         cursor: url("/assets/cursor.png") 0 0, auto;
       }
 
@@ -77,10 +85,9 @@
           font-size: 22px;
           font-weight: 700;
           line-height: 1.35;
-          margin: 10px 0 18px;
+          margin: 18px auto 10px;
           color: #ffffff;
-          text-align: justify;
-          text-justify: inter-word;
+          text-align: center;
           text-shadow:
             -2px -2px 0 #000000,
             2px -2px 0 #000000,
@@ -91,6 +98,7 @@
             -1px 1px 0 #000000,
             1px 1px 0 #000000;
           max-width: 640px;
+          font-family: "Pixel Operator 8", "MS Sans Serif", Tahoma, Verdana, Arial, sans-serif;
         }  
 
     .guest-desc{
@@ -292,14 +300,15 @@
           >
             <source src="/assets/fafo-homepage.webm" type="video/webm" />
           </video>
-          <p class="intro">
-            Welcome to Fork About and Find Out; a project showcasing exceptional individuals in tech, AI and company creation.
-          </p>
         </div>
       </div>
     </header>
+
+    <p class="intro">
+      Welcome to Fork About and Find Out; a project showcasing exceptional individuals in tech, AI and company creation.
+    </p>
     
-    <p class="sub">Hover over a portrait to reveal the episode, click to download</p>
+    <p class="sub">Hover over a portrait to reveal the episode, click to download.</p>
 
     <div class="episodes-grid" aria-label="Episodes">
             <article
