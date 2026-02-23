@@ -68,11 +68,18 @@
           inset  2px  2px 0 var(--w98-hilite);
       }
 
-     .intro{
-          font-size: 20px;
+    .intro{
+          font-size: 22px;
           font-weight: 700;
           line-height: 1.35;
           margin: 10px 0 18px;
+          color: #ffffff;
+          text-shadow:
+            -1px -1px 0 #000000,
+            1px -1px 0 #000000,
+            -1px 1px 0 #000000,
+            1px 1px 0 #000000;
+          max-width: 560px;
         }  
 
     .guest-desc{
@@ -281,14 +288,14 @@
       </div>
     </header>
     
-    <p class="sub">Hover a portrait to reveal the episode and download.</p>
+    <p class="sub">Hover over a portrait</p>
 
     <div class="episodes-grid" aria-label="Episodes">
             <article
               class="episode-card"
               data-episode
-              data-title="Episode 4 — Tim Issenmann"
-              data-desc="Placeholder description."
+              data-title="ep 004 w/ Tim Issenmann, 'Going Analogue w/ Newgrain'"
+              data-desc="Tim is a management graduate turned software engineer and founder. During university he built Newgrain, a photo sharing platform dedicated to analogue photographers. We discussed Newgrain from every angle, including a wider consideration of how gen Z is going analogue. Post graduation, Tim took his skills to a data role at Entrepreneurs First; another topic of discussion in this interview alongside the future of coding."
               data-download="/api/episodes/ep004/download"
             >
               <a
@@ -308,8 +315,8 @@
             <article
               class="episode-card"
               data-episode
-              data-title="Episode 3 — Will Lockwood"
-              data-desc="Placeholder description."
+              data-title="ep 003 w/ Will Lockwood, 'General Manager @ Sportas'"
+              data-desc="Will went straight from graduation into an operational/growth role with extensive responsiblity at Sportas, a startup bringing pick-up games into adulthood. We discussed the challenges, but also merits that come with working in an early stage startup. The interview also touched on how Will works with his neuro divergency, as well as considering how big tech needs to take on greater moral responsiblity."
               data-download="/api/episodes/ep003/download"
             >
               <a
@@ -329,8 +336,8 @@
             <article
               class="episode-card"
               data-episode
-              data-title="Episode 005 — Veer"
-              data-desc="Placeholder description."
+              data-title="ep 005 w/ Veer Vij, 'The Meta on Getting into Meta'"
+              data-desc="Veer is an IC engineering student with internships at Mu Sigma, Meta and incoming Bloomberg. His cracked application strategy was therefore a key topic of discussion. At Meta, Veer worked in the generative space, leading us to also touch on the moral safeguards (or lack of) in generative tools. Health tech and hackathons are further topics that can be found in this interview."
               data-download="#"
             >
               <a
@@ -350,7 +357,7 @@
               class="episode-card"
               data-episode
               data-title="Episode 002 w/ Gabriel Szeto, 'Building AMOU'"
-              data-desc="Gabriel is an economics student turned technical builder. This interview began with a discussion on how that shift came about. We then turned to his project titled AMOU, an interactive archive of anonymous memories that now hosts over 30,000 users and 80,000 memories."
+              data-desc="Gabriel is an economics student turned technical builder. This interview began with a discussion on how that shift came about. We then turned to his project titled AMOU, an interactive archive of anonymous memories that now hosts over 30,000 users. The trend of human emotions alongside Gabriel's work at Athena Lab and Assembly GTM were also discussed."
               data-download="/api/episodes/ep002/download"
             >
               <a
