@@ -187,12 +187,6 @@
         position: relative;
       }
 
-      .episode-title{
-        font-weight: 800;
-        font-size: 13px;
-        margin: 0;
-      }
-
       .episode-portrait-link{
         display: block;
         border: 2px solid #000;
@@ -200,8 +194,6 @@
         box-shadow:
           inset 2px 2px 0 var(--w98-shadow),
           inset -2px -2px 0 var(--w98-hilite);
-        position: relative;
-        overflow: hidden;
       }
 
       .episode-portrait{
@@ -217,25 +209,6 @@
         background: #bdbdbd;
       }
 
-      .episode-overlay{
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        padding: 8px 10px;
-        background: linear-gradient(transparent, rgba(0,0,0,0.6));
-      }
-
-      .episode-overlay-text{
-        color: #ffffff;
-        font-weight: 800;
-        text-shadow:
-          -1px -1px 0 #000000,
-          1px -1px 0 #000000,
-          -1px 1px 0 #000000,
-          1px 1px 0 #000000;
-        line-height: 1.2;
-      }
 
       .episode-details{
         display: none;
@@ -325,9 +298,6 @@
                 aria-label="Download Episode 4"
               >
                 <div class="episode-placeholder" aria-hidden="true"></div>
-                <div class="episode-overlay">
-                  <div class="episode-overlay-text">Episode 4 — Tim Issenmann</div>
-                </div>
               </a>
             </article>
 
@@ -345,9 +315,6 @@
                 aria-label="Download Episode 3"
               >
                 <div class="episode-placeholder" aria-hidden="true"></div>
-                <div class="episode-overlay">
-                  <div class="episode-overlay-text">Episode 3 — Will Lockwood</div>
-                </div>
               </a>
             </article>
 
@@ -364,10 +331,11 @@
                 download
                 aria-label="Download Episode 2"
               >
-                <div class="episode-placeholder" aria-hidden="true"></div>
-                <div class="episode-overlay">
-                  <div class="episode-overlay-text">Episode 2 — Gabriel Szeto</div>
-                </div>
+                <img
+                  class="episode-portrait"
+                  src="/assets/gabriel.png"
+                  alt="Portrait of Gabriel Szeto"
+                />
               </a>
             </article>
 
@@ -386,12 +354,9 @@
               >
                 <img
                   class="episode-portrait"
-                  src="/assets/LeonKuessner.png"
+                  src="/assets/leon.png"
                   alt="Portrait of Leon Kuessner"
                 />
-                <div class="episode-overlay">
-                  <div class="episode-overlay-text">Episode 1 — Leon Kuessner</div>
-                </div>
               </a>
             </article>
     </div>
