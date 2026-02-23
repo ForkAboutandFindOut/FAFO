@@ -74,12 +74,18 @@
           line-height: 1.35;
           margin: 10px 0 18px;
           color: #ffffff;
+          text-align: justify;
+          text-justify: inter-word;
           text-shadow:
+            -2px -2px 0 #000000,
+            2px -2px 0 #000000,
+            -2px 2px 0 #000000,
+            2px 2px 0 #000000,
             -1px -1px 0 #000000,
             1px -1px 0 #000000,
             -1px 1px 0 #000000,
             1px 1px 0 #000000;
-          max-width: 560px;
+          max-width: 640px;
         }  
 
     .guest-desc{
@@ -160,7 +166,7 @@
 
       .sub{
         margin: 12px 0 0;
-        font-size: 14px;
+        font-size: 18px;
         line-height: 1.35;
         text-align: center;
         color: #ffffff;
@@ -288,9 +294,30 @@
       </div>
     </header>
     
-    <p class="sub">Hover over a portrait</p>
+    <p class="sub">Hover over a portrait to reveal the episode, click to download</p>
 
     <div class="episodes-grid" aria-label="Episodes">
+            <article
+              class="episode-card"
+              data-episode
+              data-title="ep 005 w/ Veer Vij, 'The Meta on Getting into Meta'"
+              data-desc="Veer is an IC engineering student with internships at Mu Sigma, Meta and incoming Bloomberg. His cracked application strategy was therefore a key topic of discussion. At Meta, Veer worked in the generative space, leading us to also touch on the moral safeguards (or lack of) in generative tools. Health tech and hackathons are further topics that can be found in this interview."
+              data-download="/api/episodes/ep005/download"
+            >
+              <a
+                class="episode-portrait-link"
+                href="/api/episodes/ep005/download"
+                download
+                aria-label="Download Episode 5"
+              >
+                <img
+                  class="episode-portrait"
+                  src="/assets/portraits/Veer.png"
+                  alt="Portrait of Veer"
+                />
+              </a>
+            </article>
+
             <article
               class="episode-card"
               data-episode
@@ -336,27 +363,7 @@
             <article
               class="episode-card"
               data-episode
-              data-title="ep 005 w/ Veer Vij, 'The Meta on Getting into Meta'"
-              data-desc="Veer is an IC engineering student with internships at Mu Sigma, Meta and incoming Bloomberg. His cracked application strategy was therefore a key topic of discussion. At Meta, Veer worked in the generative space, leading us to also touch on the moral safeguards (or lack of) in generative tools. Health tech and hackathons are further topics that can be found in this interview."
-              data-download="#"
-            >
-              <a
-                class="episode-portrait-link"
-                href="#"
-                aria-label="Episode 005"
-              >
-                <img
-                  class="episode-portrait"
-                  src="/assets/portraits/Veer.png"
-                  alt="Portrait of Veer"
-                />
-              </a>
-            </article>
-
-            <article
-              class="episode-card"
-              data-episode
-              data-title="Episode 002 w/ Gabriel Szeto, 'Building AMOU'"
+              data-title="ep 002 w/ Gabriel Szeto, 'Building AMOU'"
               data-desc="Gabriel is an economics student turned technical builder. This interview began with a discussion on how that shift came about. We then turned to his project titled AMOU, an interactive archive of anonymous memories that now hosts over 30,000 users. The trend of human emotions alongside Gabriel's work at Athena Lab and Assembly GTM were also discussed."
               data-download="/api/episodes/ep002/download"
             >
@@ -377,7 +384,7 @@
             <article
               class="episode-card"
               data-episode
-              data-title="Episode 001 w/ Leon Kuessner, 'How to Win a Hackathon'"
+              data-title="ep 001 w/ Leon Kuessner, 'How to Win a Hackathon'"
               data-desc="Leon is an incoming Citadel desk analyst with an internship at Liquidnet already under his belt. This interview therefore revolves around financial data analysis; the challenges, predictions and methods. We also discussed hackathon winning strategies, as Leon took a first prize at the 2024 IC hack."
               data-download="/api/episodes/ep001/download"
             >
