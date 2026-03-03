@@ -2,19 +2,37 @@
 <html lang="en">
   <head>
     <script>
-  (function () {
-    try {
-      // If they haven’t “unlocked” access, send them to login
-      if (!localStorage.getItem("fafo_access")) {
-        const next = encodeURIComponent(location.pathname + location.search);
-        location.replace(`/login/?next=${next}`);
-      }
-    } catch (e) {
-      // If storage is blocked, still send to login
-      const next = encodeURIComponent(location.pathname + location.search);
-      location.replace(`/login/?next=${next}`);
-    }
-  })();
+      (function () {
+        async function checkGate() {
+          try {
+            const res = await fetch("/api/gate", { credentials: "include" });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.ok) {
+              localStorage.setItem("fafo_access", "1");
+              return true;
+            }
+          } catch (e) {}
+          return false;
+        }
+
+        try {
+          if (!localStorage.getItem("fafo_access")) {
+            checkGate().then((ok) => {
+              if (!ok) {
+                const next = encodeURIComponent(location.pathname + location.search);
+                location.replace(`/login/?next=${next}`);
+              }
+            });
+          }
+        } catch (e) {
+          checkGate().then((ok) => {
+            if (!ok) {
+              const next = encodeURIComponent(location.pathname + location.search);
+              location.replace(`/login/?next=${next}`);
+            }
+          });
+        }
+      })();
 </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />

@@ -313,6 +313,27 @@
     </div>
 
     <script>
+      (function () {
+        async function checkGate() {
+          try {
+            const res = await fetch("/api/gate", { credentials: "include" });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.ok) {
+              localStorage.setItem("fafo_access", "1");
+              const params = new URLSearchParams(window.location.search);
+              const next = params.get("next") || "/";
+              window.location.assign(next);
+              return true;
+            }
+          } catch (e) {}
+          return false;
+        }
+
+        try {
+          checkGate();
+        } catch (e) {}
+      })();
+
       const f = document.getElementById("f");
       const nameEl = document.getElementById("name");
       const emailEl = document.getElementById("email");
