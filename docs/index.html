@@ -307,10 +307,13 @@
       }
 
       @media (hover: none) and (pointer: coarse){
+        .sub{
+          display: none;
+        }
         .episode-tooltip{
           display: none;
         }
-        .episode-card.open .episode-details{
+        .episode-details{
           display: block;
         }
       }
@@ -491,21 +494,25 @@
         tooltip.style.top = `${y}px`;
       }
 
-      cards.forEach((card) => {
-        card.addEventListener("mouseenter", (e) => {
-          setTooltipContent(card);
-          positionTooltip(e);
-          tooltip.classList.add("show");
-          tooltip.setAttribute("aria-hidden", "false");
-        });
+      const isTouch = window.matchMedia && window.matchMedia("(hover: none) and (pointer: coarse)").matches;
 
-        card.addEventListener("mousemove", positionTooltip);
+      if (!isTouch) {
+        cards.forEach((card) => {
+          card.addEventListener("mouseenter", (e) => {
+            setTooltipContent(card);
+            positionTooltip(e);
+            tooltip.classList.add("show");
+            tooltip.setAttribute("aria-hidden", "false");
+          });
 
-        card.addEventListener("mouseleave", () => {
-          tooltip.classList.remove("show");
-          tooltip.setAttribute("aria-hidden", "true");
+          card.addEventListener("mousemove", positionTooltip);
+
+          card.addEventListener("mouseleave", () => {
+            tooltip.classList.remove("show");
+            tooltip.setAttribute("aria-hidden", "true");
+          });
         });
-      });
+      }
 
       function fillDetails(card) {
         const details = card.querySelector(".episode-details");
@@ -527,22 +534,8 @@
         }
       }
 
-      const isTouch = window.matchMedia && window.matchMedia("(hover: none) and (pointer: coarse)").matches;
       if (isTouch) {
         cards.forEach((card) => fillDetails(card));
-        cards.forEach((card) => {
-          card.addEventListener("click", (e) => {
-            const target = e.target;
-            if (target instanceof Element && target.closest(".episode-details a")) {
-              return;
-            }
-            e.preventDefault();
-            cards.forEach((other) => {
-              if (other !== card) other.classList.remove("open");
-            });
-            card.classList.toggle("open");
-          });
-        });
       }
     </script>
 
