@@ -256,6 +256,19 @@
 
       .episode-details{
         display: none;
+        background: #fff;
+        border: 2px solid #000;
+        box-shadow:
+          inset 2px 2px 0 var(--w98-shadow),
+          inset -2px -2px 0 var(--w98-hilite);
+        padding: 8px;
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .episode-details a{
+        color: #000000;
+        text-decoration: none;
       }
 
       .episode-tooltip{
@@ -291,6 +304,15 @@
         font-weight: 700;
         color: #000000;
         text-decoration: none;
+      }
+
+      @media (hover: none) and (pointer: coarse){
+        .episode-tooltip{
+          display: none;
+        }
+        .episode-card.open .episode-details{
+          display: block;
+        }
       }
     </style>
   </head>
@@ -348,6 +370,7 @@
                   alt="Portrait of Veer"
                 />
               </a>
+              <div class="episode-details"></div>
             </article>
 
             <article
@@ -369,6 +392,7 @@
                   alt="Portrait of Tim Issenmann"
                 />
               </a>
+              <div class="episode-details"></div>
             </article>
 
             <article
@@ -390,6 +414,7 @@
                   alt="Portrait of Will Lockwood"
                 />
               </a>
+              <div class="episode-details"></div>
             </article>
 
             <article
@@ -411,6 +436,7 @@
                   alt="Portrait of Gabriel Szeto"
                 />
               </a>
+              <div class="episode-details"></div>
             </article>
 
             <article
@@ -432,6 +458,7 @@
                   alt="Portrait of Leon Kuessner"
                 />
               </a>
+              <div class="episode-details"></div>
             </article>
     </div>
 
@@ -479,6 +506,44 @@
           tooltip.setAttribute("aria-hidden", "true");
         });
       });
+
+      function fillDetails(card) {
+        const details = card.querySelector(".episode-details");
+        if (!details) return;
+        const title = card.dataset.title || "";
+        const desc = card.dataset.desc || "";
+        const download = card.dataset.download || "#";
+        details.innerHTML = `
+          <div><strong>${title}</strong></div>
+          <div>${desc}</div>
+          <div><strong>Click to download the MP3 🍴</strong></div>
+        `;
+        if (download && download !== "#") {
+          details.innerHTML = `
+            <div><strong>${title}</strong></div>
+            <div>${desc}</div>
+            <div><a href="${download}" download><strong>Click to download the MP3 🍴</strong></a></div>
+          `;
+        }
+      }
+
+      const isTouch = window.matchMedia && window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+      if (isTouch) {
+        cards.forEach((card) => fillDetails(card));
+        cards.forEach((card) => {
+          card.addEventListener("click", (e) => {
+            const target = e.target;
+            if (target instanceof Element && target.closest(".episode-details a")) {
+              return;
+            }
+            e.preventDefault();
+            cards.forEach((other) => {
+              if (other !== card) other.classList.remove("open");
+            });
+            card.classList.toggle("open");
+          });
+        });
+      }
     </script>
 
     <!-- RSS intentionally hidden for now -->
