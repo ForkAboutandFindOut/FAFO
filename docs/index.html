@@ -219,6 +219,14 @@
         gap: 14px;
         margin-top: 18px;
         padding: 0 16px 40px;
+        align-items: start;
+        grid-auto-rows: auto;
+      }
+
+      @media (min-width: 1100px){
+        .episodes-grid{
+          grid-template-columns: repeat(5, minmax(150px, 1fr));
+        }
       }
 
       .episode-card{
@@ -229,6 +237,7 @@
         display: grid;
         gap: 6px;
         position: relative;
+        align-self: start;
       }
 
       .episode-portrait-link{
@@ -348,7 +357,7 @@
     </header>
 
     <p class="intro">
-      Welcome to Fork About and Find Out; a project showcasing exceptional individuals in tech, AI and company creation.
+      Welcome to Fork About and Find Out; a project showcasing brilliant individuals in tech, AI and company creation.
     </p>
     
     <p class="sub">Hover over a portrait to reveal the episode, click to download.</p>
