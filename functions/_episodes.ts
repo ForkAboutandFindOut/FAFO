@@ -38,8 +38,8 @@ export const EPISODES: Episode[] = [
   },
   {
     id: "ep006",
-    title: "Theo",
+    title: "Aarin",
     r2_key: "episodes/ep006.mp3",
-    filename: "FAFO_ep006_Theo.mp3",
+    filename: "FAFO_ep006_Aarin.mp3",
   },
 ];
