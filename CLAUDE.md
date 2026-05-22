@@ -77,6 +77,10 @@ Per-guest prep follows the template at `~/Library/CloudStorage/.../FAFO/Guests/_
 
 A retrospective audit lives at `~/Library/CloudStorage/.../FAFO/Guests/_Interview_Analysis.md`.
 
+## Episode descriptions
+
+Style guide at `EPISODE_DESCRIPTIONS.md` (repo root). Read it before writing any new `data-desc` text on an `.episode-card` in `docs/index.html`. Three-act shape, 60–90 words, earnest (no hype), and the cold-open hook from the prep notes should inform the description's framing.
+
 ## Transcription
 
 For each new episode MP3:
