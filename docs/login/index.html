@@ -135,17 +135,11 @@
       }
 
       .checkrow input[type="checkbox"]{
-        width: 22px;
-        height: 22px;
+        width: 18px;
+        height: 18px;
         margin: 0;
         flex: 0 0 auto;
-        cursor: pointer !important;
         accent-color: #000080;
-      }
-
-      .checkrow input[type="checkbox"]:hover{
-        outline: 1px dotted #000;
-        outline-offset: 2px;
       }
 
       .checkrow-label{
@@ -333,6 +327,19 @@
       const updatesEl = document.getElementById("updates");
       const msg = document.getElementById("msg");
       const btn = document.getElementById("btn");
+
+      // Make the entire checkbox row clickable so the small checkbox is easier to tick.
+      // Clicks on the checkbox itself fall through to native behaviour; clicks anywhere
+      // else on the row toggle it programmatically.
+      const checkrow = document.querySelector(".checkrow");
+      if (checkrow) {
+        checkrow.addEventListener("click", (e) => {
+          if (e.target !== updatesEl) {
+            updatesEl.checked = !updatesEl.checked;
+            updatesEl.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        });
+      }
 
       const params = new URLSearchParams(window.location.search);
       const next = params.get("next") || "/";
