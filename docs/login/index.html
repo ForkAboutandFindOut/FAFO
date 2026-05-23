@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Fork About &amp; Find Out — Enter Network Password</title>
+    <title>Fork About &amp; Find Out — Access</title>
 
     <style>
       :root{
@@ -54,56 +54,8 @@
 
       .titlebar{
         background: var(--w98-title);
-        color: var(--w98-title-text);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 4px 6px;
-        font-weight: 700;
-        font-size: 13px;
-        user-select: none;
         height: 22px;
-        box-sizing: content-box;
-      }
-
-      .titlebar .title{
-        font-size: 13px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        padding-left: 2px;
-      }
-
-      .titlebar-controls{
-        display: flex;
-        gap: 3px;
-      }
-
-      .ctrl{
-        width: 18px;
-        height: 16px;
-        background: var(--w98-face);
-        color: #000;
-        border: 0;
-        font-family: "Marlett", "MS Sans Serif", sans-serif;
-        font-size: 9px;
-        line-height: 14px;
-        text-align: center;
-        padding: 0;
-        box-shadow:
-          inset -1px -1px 0 var(--w98-deep),
-          inset 1px 1px 0 var(--w98-hilite),
-          inset -2px -2px 0 var(--w98-shadow),
-          inset 2px 2px 0 var(--w98-face);
-        cursor: url("/assets/cursor.png") 0 0, auto;
-      }
-
-      .ctrl:active{
-        box-shadow:
-          inset 1px 1px 0 var(--w98-deep),
-          inset -1px -1px 0 var(--w98-hilite),
-          inset 2px 2px 0 var(--w98-shadow),
-          inset -2px -2px 0 var(--w98-face);
+        user-select: none;
       }
 
       .dialog-body{
@@ -150,6 +102,7 @@
       .row-value{
         font-size: 13px;
         font-family: "Courier New", monospace;
+        font-weight: 700;
       }
 
       .row input[type="text"],
@@ -182,18 +135,28 @@
       }
 
       .checkrow input[type="checkbox"]{
-        width: 14px;
-        height: 14px;
+        width: 18px;
+        height: 18px;
         margin: 0;
         flex: 0 0 auto;
       }
 
-      .checkrow label{
-        margin: 0;
+      .checkrow-label{
         font-size: 13px;
         line-height: 1.3;
-        cursor: pointer;
         user-select: none;
+      }
+
+      .emoji-outline{
+        text-shadow:
+          -1px -1px 0 #000,
+           1px -1px 0 #000,
+          -1px  1px 0 #000,
+           1px  1px 0 #000,
+           0px -1px 0 #000,
+           0px  1px 0 #000,
+          -1px  0px 0 #000,
+           1px  0px 0 #000;
       }
 
       #msg{
@@ -246,54 +209,6 @@
         cursor: not-allowed;
       }
 
-      /* --- Cancel-confirmation error dialog --- */
-      .modal-veil{
-        position: fixed;
-        inset: 0;
-        background: transparent;
-        display: none;
-        place-items: center;
-        z-index: 50;
-      }
-      .modal-veil.open{ display: grid; }
-
-      .error-dialog{
-        width: min(360px, 90%);
-      }
-
-      .error-body{
-        display: grid;
-        grid-template-columns: 48px 1fr;
-        gap: 16px;
-        align-items: center;
-        padding: 18px 16px 8px;
-      }
-
-      .error-icon{
-        width: 32px;
-        height: 32px;
-        background: #fff;
-        border: 2px solid #000;
-        color: #b00020;
-        font-weight: 800;
-        font-size: 22px;
-        line-height: 28px;
-        text-align: center;
-        font-family: "Times New Roman", serif;
-      }
-
-      .error-text{
-        font-size: 13px;
-        line-height: 1.4;
-        color: #000;
-      }
-
-      .error-actions{
-        display: flex;
-        justify-content: flex-end;
-        padding: 6px 16px 14px;
-      }
-
       /* --- Responsive: stack icon above on narrow screens --- */
       @media (max-width: 480px){
         .dialog-body{
@@ -308,14 +223,8 @@
 
   <body>
     <div class="desktop">
-      <div class="dialog" role="dialog" aria-labelledby="dialogTitle" aria-describedby="dialogPrompt">
-        <div class="titlebar">
-          <div class="title" id="dialogTitle">Enter Network Password</div>
-          <div class="titlebar-controls">
-            <button class="ctrl" type="button" aria-label="Help">?</button>
-            <button class="ctrl" type="button" aria-label="Close" id="closeX">×</button>
-          </div>
-        </div>
+      <div class="dialog" role="dialog" aria-describedby="dialogPrompt">
+        <div class="titlebar"></div>
 
         <div class="dialog-body">
           <video
@@ -332,7 +241,7 @@
 
           <div class="fields">
             <p class="prompt" id="dialogPrompt">
-              You must supply your details to access this network.
+              You must supply your details to access the full interviews
             </p>
 
             <div class="row">
@@ -342,12 +251,23 @@
 
             <form id="f" autocomplete="on">
               <div class="row">
-                <label for="name" class="row-label">User name:</label>
+                <label for="firstName" class="row-label">First name:</label>
                 <input
-                  id="name"
-                  name="name"
+                  id="firstName"
+                  name="firstName"
                   type="text"
-                  autocomplete="name"
+                  autocomplete="given-name"
+                  required
+                />
+              </div>
+
+              <div class="row" style="margin-top: 8px;">
+                <label for="lastName" class="row-label">Last name:</label>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  autocomplete="family-name"
                   required
                 />
               </div>
@@ -365,40 +285,16 @@
 
               <div class="checkrow">
                 <input id="updates" name="updates" type="checkbox" />
-                <label for="updates">
-                  Add me to the FAFO mailing list 🍴
-                </label>
+                <span class="checkrow-label">Add me to the FAFO mailing list <span class="emoji-outline">🍴</span></span>
               </div>
 
               <p id="msg" aria-live="polite"></p>
 
               <div class="actions">
                 <button id="btn" type="submit" class="dialog-btn">OK</button>
-                <button id="cancelBtn" type="button" class="dialog-btn">Cancel</button>
               </div>
             </form>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Cancel-confirmation modal (hidden until Cancel clicked) -->
-    <div class="modal-veil" id="cancelModal" role="dialog" aria-labelledby="cancelTitle" aria-modal="true">
-      <div class="dialog error-dialog">
-        <div class="titlebar">
-          <div class="title" id="cancelTitle">Connection cancelled</div>
-          <div class="titlebar-controls">
-            <button class="ctrl" type="button" aria-label="Close" id="errorCloseX">×</button>
-          </div>
-        </div>
-        <div class="error-body">
-          <div class="error-icon" aria-hidden="true">!</div>
-          <div class="error-text">
-            This page cannot be displayed without network access.
-          </div>
-        </div>
-        <div class="error-actions">
-          <button class="dialog-btn" id="cancelDialogOk" autofocus>OK</button>
         </div>
       </div>
     </div>
@@ -424,16 +320,12 @@
       })();
 
       const f = document.getElementById("f");
-      const nameEl = document.getElementById("name");
+      const firstNameEl = document.getElementById("firstName");
+      const lastNameEl = document.getElementById("lastName");
       const emailEl = document.getElementById("email");
       const updatesEl = document.getElementById("updates");
       const msg = document.getElementById("msg");
       const btn = document.getElementById("btn");
-      const cancelBtn = document.getElementById("cancelBtn");
-      const closeX = document.getElementById("closeX");
-      const cancelModal = document.getElementById("cancelModal");
-      const cancelDialogOk = document.getElementById("cancelDialogOk");
-      const errorCloseX = document.getElementById("errorCloseX");
 
       const params = new URLSearchParams(window.location.search);
       const next = params.get("next") || "/";
@@ -443,39 +335,21 @@
         msg.className = type ? type : "";
       }
 
-      function openCancelModal() {
-        cancelModal.classList.add("open");
-        cancelDialogOk.focus();
-      }
-      function closeCancelModal() {
-        cancelModal.classList.remove("open");
-        nameEl.focus();
-      }
-
-      cancelBtn.addEventListener("click", openCancelModal);
-      closeX.addEventListener("click", openCancelModal);
-      cancelDialogOk.addEventListener("click", closeCancelModal);
-      errorCloseX.addEventListener("click", closeCancelModal);
-
-      // Esc closes the cancel modal if it's open
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && cancelModal.classList.contains("open")) {
-          closeCancelModal();
-        }
-      });
-
       f.addEventListener("submit", async (e) => {
         e.preventDefault();
         setMsg("Connecting…", "");
         btn.disabled = true;
-        cancelBtn.disabled = true;
 
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 12000);
 
         try {
+          const firstName = firstNameEl.value.trim();
+          const lastName = lastNameEl.value.trim();
+          const fullName = [firstName, lastName].filter(Boolean).join(" ");
+
           const payload = {
-            name: nameEl.value.trim(),
+            name: fullName,
             email: emailEl.value.trim(),
             marketing_opt_in: !!updatesEl?.checked,
             consent_version: "login_updates_v1",
@@ -507,7 +381,6 @@
         } finally {
           clearTimeout(timeout);
           btn.disabled = false;
-          cancelBtn.disabled = false;
         }
       });
     </script>
