@@ -1,15 +1,16 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Fork About &amp; Find Out — Access</title>
+    <title>Fork About &amp; Find Out — Enter Network Password</title>
 
     <style>
       :root{
         --w98-bg: #008080;          /* Win98 teal desktop */
         --w98-face: #c0c0c0;        /* window face */
         --w98-shadow: #808080;      /* dark bevel */
+        --w98-deep:   #404040;      /* deeper shadow */
         --w98-hilite: #ffffff;      /* light bevel */
         --w98-text: #000000;
         --w98-title: #000080;       /* titlebar navy */
@@ -18,7 +19,6 @@
 
       html, body { height: 100%; }
 
-      /* Desktop background */
       body{
         margin: 0;
         background: var(--w98-bg);
@@ -34,285 +34,377 @@
         cursor: url("/assets/cursor.png") 0 0, auto;
       }
 
-      .wrap{
+      .desktop{
         min-height: 100%;
         display: grid;
         place-items: center;
-        padding: 40px 16px;
+        padding: 24px 16px;
       }
 
-      /* Win98 window */
-      .window{
-        width: min(600px, 100%);
+      /* --- Win98 dialog --- */
+      .dialog{
+        width: min(480px, 100%);
         background: var(--w98-face);
         border: 2px solid var(--w98-hilite);
         box-shadow:
           inset -2px -2px 0 var(--w98-shadow),
           inset  2px  2px 0 var(--w98-hilite),
           2px 2px 0 #000;
-        background-image: linear-gradient(rgba(0,0,0,0.02), rgba(0,0,0,0.02));
       }
 
-      /* Title bar */
       .titlebar{
         background: var(--w98-title);
         color: var(--w98-title-text);
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 6px 8px;
+        padding: 4px 6px;
         font-weight: 700;
+        font-size: 13px;
         user-select: none;
+        height: 22px;
+        box-sizing: content-box;
       }
 
-      .titlebar-left{
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        min-width: 0;
-      }
-
-      .titlebar-left .title{
+      .titlebar .title{
         font-size: 13px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        padding-left: 2px;
       }
 
       .titlebar-controls{
         display: flex;
-        gap: 6px;
+        gap: 3px;
       }
 
       .ctrl{
         width: 18px;
-        height: 18px;
+        height: 16px;
         background: var(--w98-face);
-        border: 2px solid var(--w98-hilite);
+        color: #000;
+        border: 0;
+        font-family: "Marlett", "MS Sans Serif", sans-serif;
+        font-size: 9px;
+        line-height: 14px;
+        text-align: center;
+        padding: 0;
         box-shadow:
+          inset -1px -1px 0 var(--w98-deep),
+          inset 1px 1px 0 var(--w98-hilite),
           inset -2px -2px 0 var(--w98-shadow),
-          inset  2px  2px 0 var(--w98-hilite);
+          inset 2px 2px 0 var(--w98-face);
+        cursor: url("/assets/cursor.png") 0 0, auto;
       }
 
-      /* Window body */
-      .content{
-        padding: 14px 16px 16px;
+      .ctrl:active{
+        box-shadow:
+          inset 1px 1px 0 var(--w98-deep),
+          inset -1px -1px 0 var(--w98-hilite),
+          inset 2px 2px 0 var(--w98-shadow),
+          inset -2px -2px 0 var(--w98-face);
       }
 
-      .header{
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
+      .dialog-body{
+        display: grid;
+        grid-template-columns: 96px 1fr;
+        gap: 16px;
+        padding: 18px 16px 14px;
       }
 
       .spin-logo{
         width: 96px;
         height: 96px;
-        border-radius: 6px;
-        background: var(--w98-face);
-        object-fit: cover;
-        border: 2px solid var(--w98-hilite);
-        box-shadow:
-          inset -2px -2px 0 var(--w98-shadow),
-          inset  2px  2px 0 var(--w98-hilite);
-      }
-
-      .logo{
-        width: 56px;
-        height: 56px;
-        border-radius: 8px;
-        background: #fff;
-        object-fit: cover;
-        image-rendering: pixelated;
-        border: 2px solid var(--w98-hilite);
-        box-shadow:
-          inset -2px -2px 0 var(--w98-shadow),
-          inset  2px  2px 0 var(--w98-hilite);
-      }
-
-      h1{
-        margin: 0;
-        font-size: 20px;
-        font-weight: 700;
-      }
-
-      /* Form */
-      form{ margin: 0; }
-
-      label{
         display: block;
-        font-size: 13px;
-        margin: 12px 0 6px;
-        color: #000000;
-        font-weight: 700;
+        background: transparent;
       }
 
-      input[type="text"],
-      input[type="email"]{
+      .fields{
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .prompt{
+        margin: 0 0 6px;
+        font-size: 13px;
+        line-height: 1.35;
+        color: #000;
+      }
+
+      .row{
+        display: grid;
+        grid-template-columns: 92px 1fr;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .row-label{
+        font-size: 13px;
+        color: #000;
+        text-align: left;
+      }
+
+      .row-value{
+        font-size: 13px;
+        font-family: "Courier New", monospace;
+      }
+
+      .row input[type="text"],
+      .row input[type="email"]{
         width: 100%;
         box-sizing: border-box;
-        padding: 10px;
+        padding: 4px 6px;
         font-size: 14px;
+        font-family: "MS Sans Serif", Tahoma, Verdana, Arial, sans-serif;
         background: #ffffff;
-        border: 2px solid #000;
+        border: 2px solid var(--w98-shadow);
         box-shadow:
-          inset 2px 2px 0 var(--w98-shadow),
-          inset -2px -2px 0 var(--w98-hilite);
+          inset 1px 1px 0 var(--w98-deep),
+          inset -1px -1px 0 var(--w98-hilite);
+        outline: none;
       }
 
-      .fineprint{
-        font-size: 12px;
-        line-height: 1.35;
-        margin: 10px 0 0;
-        color: #111;
+      .row input:focus{
+        outline: 1px dotted #000;
+        outline-offset: -3px;
       }
 
       .checkrow{
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-top: 12px;
+        gap: 8px;
+        margin-top: 4px;
         font-size: 13px;
-        padding: 6px 8px;
-        background: #ffffff;
-        border: 2px solid var(--w98-hilite);
-        box-shadow:
-          inset -2px -2px 0 var(--w98-shadow),
-          inset  2px  2px 0 var(--w98-hilite);
+        color: #000;
       }
 
       .checkrow input[type="checkbox"]{
-        width: 22px;
-        height: 22px;
-        margin-top: 2px;
+        width: 14px;
+        height: 14px;
+        margin: 0;
         flex: 0 0 auto;
-        background: #fff;
-        border: 2px solid #000;
-        box-shadow:
-          inset 2px 2px 0 var(--w98-shadow),
-          inset -2px -2px 0 var(--w98-hilite);
       }
 
       .checkrow label{
         margin: 0;
-        font-size: 14px;
+        font-size: 13px;
         line-height: 1.3;
-        color: #000000;
-        font-weight: 700;
         cursor: pointer;
         user-select: none;
       }
 
-        button{
-      width: 100%;
-      box-sizing: border-box;
-    
-      /* move it down */
-      margin-top: 22px;
-    
-      /* make it bigger */
-      padding: 14px 12px;
-      font-size: 16px;
-    
-      background: var(--w98-face);
-      border: 2px solid var(--w98-hilite);
-      box-shadow:
-        inset -2px -2px 0 var(--w98-shadow),
-        inset  2px  2px 0 var(--w98-hilite);
-      cursor: pointer;
-    }
+      #msg{
+        margin: 6px 0 0;
+        min-height: 14px;
+        font-size: 12px;
+        line-height: 1.3;
+      }
+      .err{ color: #b00020; }
+      .ok{ color: #0a7a0a; }
 
-      button:active{
-        box-shadow:
-          inset 2px 2px 0 var(--w98-shadow),
-          inset -2px -2px 0 var(--w98-hilite);
+      .actions{
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 8px;
       }
 
-      button:disabled{
+      .dialog-btn{
+        min-width: 76px;
+        padding: 4px 12px;
+        font-size: 13px;
+        font-family: "MS Sans Serif", Tahoma, Verdana, Arial, sans-serif;
+        background: var(--w98-face);
+        color: #000;
+        border: 1px solid #000;
+        box-shadow:
+          inset -1px -1px 0 var(--w98-shadow),
+          inset  1px  1px 0 var(--w98-hilite),
+          inset -2px -2px 0 var(--w98-deep),
+          inset  2px  2px 0 var(--w98-face);
+        cursor: url("/assets/cursor.png") 0 0, auto;
+      }
+
+      .dialog-btn:active{
+        box-shadow:
+          inset 1px 1px 0 var(--w98-shadow),
+          inset -1px -1px 0 var(--w98-hilite),
+          inset 2px 2px 0 var(--w98-deep),
+          inset -2px -2px 0 var(--w98-face);
+      }
+
+      .dialog-btn:focus{
+        outline: 1px dotted #000;
+        outline-offset: -4px;
+      }
+
+      .dialog-btn:disabled{
         opacity: 0.65;
         cursor: not-allowed;
       }
 
-      #msg{
-        margin: 10px 0 0;
-        min-height: 18px;
-        overflow: visible;
-        padding: 0;
-        font-size: 13px;
+      /* --- Cancel-confirmation error dialog --- */
+      .modal-veil{
+        position: fixed;
+        inset: 0;
+        background: transparent;
+        display: none;
+        place-items: center;
+        z-index: 50;
       }
-      .err{ color: #b00020; }
-      .ok{ color: #0a7a0a; }
+      .modal-veil.open{ display: grid; }
+
+      .error-dialog{
+        width: min(360px, 90%);
+      }
+
+      .error-body{
+        display: grid;
+        grid-template-columns: 48px 1fr;
+        gap: 16px;
+        align-items: center;
+        padding: 18px 16px 8px;
+      }
+
+      .error-icon{
+        width: 32px;
+        height: 32px;
+        background: #fff;
+        border: 2px solid #000;
+        color: #b00020;
+        font-weight: 800;
+        font-size: 22px;
+        line-height: 28px;
+        text-align: center;
+        font-family: "Times New Roman", serif;
+      }
+
+      .error-text{
+        font-size: 13px;
+        line-height: 1.4;
+        color: #000;
+      }
+
+      .error-actions{
+        display: flex;
+        justify-content: flex-end;
+        padding: 6px 16px 14px;
+      }
+
+      /* --- Responsive: stack icon above on narrow screens --- */
+      @media (max-width: 480px){
+        .dialog-body{
+          grid-template-columns: 1fr;
+          justify-items: start;
+        }
+        .spin-logo{ margin: 0 auto; }
+        .row{ grid-template-columns: 80px 1fr; }
+      }
     </style>
   </head>
 
   <body>
-    <div class="wrap">
-      <div class="window" role="dialog" aria-label="FAFO Access">
+    <div class="desktop">
+      <div class="dialog" role="dialog" aria-labelledby="dialogTitle" aria-describedby="dialogPrompt">
         <div class="titlebar">
-          <div class="titlebar-left">
-            <div class="title">Fork About &amp; Find Out</div>
-          </div>
-          <div class="titlebar-controls" aria-hidden="true">
-            <div class="ctrl" title="Minimize"></div>
-            <div class="ctrl" title="Maximize"></div>
-            <div class="ctrl" title="Close"></div>
+          <div class="title" id="dialogTitle">Enter Network Password</div>
+          <div class="titlebar-controls">
+            <button class="ctrl" type="button" aria-label="Help">?</button>
+            <button class="ctrl" type="button" aria-label="Close" id="closeX">×</button>
           </div>
         </div>
 
-        <div class="content">
-          <div class="header">
-            <video
-              class="spin-logo"
-              autoplay
-              loop
-              muted
-              playsinline
-              aria-label="FAFO spinning logo"
-            >
-              <source src="/assets/fafo-spin.webm" type="video/webm" />
-              <source src="/assets/fafo-spin.mp4" type="video/mp4" />
-            </video>
-            <h1>Get access</h1>
-          </div>
+        <div class="dialog-body">
+          <video
+            class="spin-logo"
+            autoplay
+            loop
+            muted
+            playsinline
+            aria-hidden="true"
+          >
+            <source src="/assets/fafo-spin.webm" type="video/webm" />
+            <source src="/assets/fafo-spin.mp4" type="video/mp4" />
+          </video>
 
-          <form id="f">
-            <label for="name">Name</label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              placeholder="Ada Lovelace"
-              autocomplete="name"
-              required
-            />
+          <div class="fields">
+            <p class="prompt" id="dialogPrompt">
+              You must supply your details to access this network.
+            </p>
 
-            <label for="email">Email</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="you@domain.com"
-              autocomplete="email"
-              required
-            />
-
-            <div class="checkrow">
-              <input id="updates" name="updates" type="checkbox" />
-              <label for="updates">
-                Sign up to join the FAFO mailing list 🍴
-              </label>
+            <div class="row">
+              <span class="row-label">Resource:</span>
+              <span class="row-value">\\FAFO\GUEST</span>
             </div>
 
-            <button id="btn" type="submit">Continue</button>
+            <form id="f" autocomplete="on">
+              <div class="row">
+                <label for="name" class="row-label">User name:</label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autocomplete="name"
+                  required
+                />
+              </div>
 
-            <p id="msg" class="hint" aria-live="polite"></p>
-          </form>
+              <div class="row" style="margin-top: 8px;">
+                <label for="email" class="row-label">Email:</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+
+              <div class="checkrow">
+                <input id="updates" name="updates" type="checkbox" />
+                <label for="updates">
+                  Add me to the FAFO mailing list 🍴
+                </label>
+              </div>
+
+              <p id="msg" aria-live="polite"></p>
+
+              <div class="actions">
+                <button id="btn" type="submit" class="dialog-btn">OK</button>
+                <button id="cancelBtn" type="button" class="dialog-btn">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cancel-confirmation modal (hidden until Cancel clicked) -->
+    <div class="modal-veil" id="cancelModal" role="dialog" aria-labelledby="cancelTitle" aria-modal="true">
+      <div class="dialog error-dialog">
+        <div class="titlebar">
+          <div class="title" id="cancelTitle">Connection cancelled</div>
+          <div class="titlebar-controls">
+            <button class="ctrl" type="button" aria-label="Close" id="errorCloseX">×</button>
+          </div>
+        </div>
+        <div class="error-body">
+          <div class="error-icon" aria-hidden="true">!</div>
+          <div class="error-text">
+            This page cannot be displayed without network access.
+          </div>
+        </div>
+        <div class="error-actions">
+          <button class="dialog-btn" id="cancelDialogOk" autofocus>OK</button>
         </div>
       </div>
     </div>
 
     <script>
+      // Skip login if the gate cookie is already valid for this browser
       (function () {
         async function checkGate() {
           try {
@@ -328,10 +420,7 @@
           } catch (e) {}
           return false;
         }
-
-        try {
-          checkGate();
-        } catch (e) {}
+        try { checkGate(); } catch (e) {}
       })();
 
       const f = document.getElementById("f");
@@ -340,19 +429,46 @@
       const updatesEl = document.getElementById("updates");
       const msg = document.getElementById("msg");
       const btn = document.getElementById("btn");
+      const cancelBtn = document.getElementById("cancelBtn");
+      const closeX = document.getElementById("closeX");
+      const cancelModal = document.getElementById("cancelModal");
+      const cancelDialogOk = document.getElementById("cancelDialogOk");
+      const errorCloseX = document.getElementById("errorCloseX");
 
       const params = new URLSearchParams(window.location.search);
       const next = params.get("next") || "/";
 
       function setMsg(text, type) {
         msg.textContent = text || "";
-        msg.className = type ? type : "hint";
+        msg.className = type ? type : "";
       }
+
+      function openCancelModal() {
+        cancelModal.classList.add("open");
+        cancelDialogOk.focus();
+      }
+      function closeCancelModal() {
+        cancelModal.classList.remove("open");
+        nameEl.focus();
+      }
+
+      cancelBtn.addEventListener("click", openCancelModal);
+      closeX.addEventListener("click", openCancelModal);
+      cancelDialogOk.addEventListener("click", closeCancelModal);
+      errorCloseX.addEventListener("click", closeCancelModal);
+
+      // Esc closes the cancel modal if it's open
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && cancelModal.classList.contains("open")) {
+          closeCancelModal();
+        }
+      });
 
       f.addEventListener("submit", async (e) => {
         e.preventDefault();
-        setMsg("Saving…", "hint");
+        setMsg("Connecting…", "");
         btn.disabled = true;
+        cancelBtn.disabled = true;
 
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 12000);
@@ -376,20 +492,22 @@
 
           if (!res.ok || !data.ok) {
             const err = data.error || data.details || "Something went wrong.";
-            setMsg("❌ " + err, "err");
+            setMsg(err, "err");
             return;
           }
 
-          setMsg("✅ You’re in. Redirecting…", "ok");
+          // TODO (wow-factor B): replace immediate redirect with a boot sequence transition.
+          setMsg("Access granted. Redirecting…", "ok");
           localStorage.setItem("fafo_access", "1");
           window.location.assign(next);
         } catch (err) {
           console.error(err);
           const isAbort = err && err.name === "AbortError";
-          setMsg(isAbort ? "❌ Request timed out. Try again." : "❌ Network/JS error. Check console.", "err");
+          setMsg(isAbort ? "Request timed out. Try again." : "Network/JS error. Check console.", "err");
         } finally {
           clearTimeout(timeout);
           btn.disabled = false;
+          cancelBtn.disabled = false;
         }
       });
     </script>
