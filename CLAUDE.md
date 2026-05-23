@@ -34,6 +34,23 @@ So the gate is mailing-list capture, not authentication — anyone can type any 
 
 90s "windowcore", vibes-based (not strict Win98). Goal: full desktop simulation (taskbar, multiple windows, possibly Start menu) with modern UX underneath — no fake loading delays, no ironic gimmicks. Reference points: 98.css, 7.gui, aesthetic.computer. Done-state = "first friend reaction is 'whoa'". Desktop-first; mobile just needs to not break.
 
+## Login dialog
+
+`/login/index.html` is a Win98 "Enter Network Password" dialog (~480px). Empty navy titlebar (intentional — no title, no controls), spinning logo (96px) as the left icon, three fields on the right (**First name**, **Last name**, **Email**), mailing-list checkbox, single **OK** (no Cancel).
+
+- First/last name fields are **concatenated client-side** into a single `name` string before POST to `/api/subscribe`. The Supabase `mailing_list` table still stores `name`. Splitting into `first_name`/`last_name` columns is a propose-first change to `subscribe.ts` + schema.
+- Checkbox is 18×18 with `accent-color: #000080`. A JS click handler on `.checkrow` toggles the box from clicks **anywhere on the row** (label, gap, emoji); clicks on the checkbox itself fall through to native — no double-toggle.
+- Custom FAFO cursor everywhere via `*{ cursor: url(...) 0 0, auto }`. Don't override with `pointer` — visual consistency wins over click affordance.
+- Submit handler has a `// TODO (wow-factor B)` marker at the immediate-redirect line — the boot sequence hooks in there.
+
+## Wow-factor roadmap
+
+Path to the "Aesthetic direction" desktop-sim goal. Phased:
+
+- **A — Login as Win98 dialog.** Done, deployed (see Login dialog above).
+- **B — Boot sequence transition** (next). After login submit succeeds, intercept the redirect and show a brief BIOS/POST sequence (memory check, gate verify, "Welcome, <Name>", fade to homepage). Triggered once per session — returning visitors with `localStorage.fafo_access=1` skip it. Hook point already marked in the login submit handler.
+- **E — Floating decorative desktop windows** (deferred). Ambient windows scattered behind main content (Solitaire auto-playing, MS Paint of logo, Notepad with guest quote). Pairs with the eventual full desktop sim.
+
 ## Workflow facts
 
 - Audio lives in Cloudflare R2; download endpoint streams from there.
@@ -61,6 +78,8 @@ cd docs && python3 -m http.server 8000
 Visit `http://localhost:8000/`. The gate's `/api/gate` call will 404; bypass once via DevTools console: `localStorage.setItem("fafo_access","1"); location.reload();`.
 
 For testing functions/auth locally, set up `wrangler` with a `.dev.vars` file (not done yet).
+
+**Preview-tool gotcha:** macOS sandboxes Claude's Python subprocesses from `~/Desktop/`, so the Claude Preview MCP can't serve files from this repo directly. To use `preview_start` / `preview_screenshot`, copy `docs/` to `/tmp/fafo-preview/` first and point `~/.claude/launch.json` at `--directory /tmp/fafo-preview`. The Bash `python3 -m http.server` invocation above is unaffected.
 
 ## Conventions
 
