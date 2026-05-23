@@ -219,6 +219,46 @@
         .spin-logo{ margin: 0 auto; }
         .row{ grid-template-columns: 80px 1fr; }
       }
+
+      /* --- Boot / POST screen (wow-factor B) --- */
+      .boot-screen{
+        position: fixed;
+        inset: 0;
+        background: #000;
+        color: #f5f5f5;
+        font-family: "Courier New", "Lucida Console", monospace;
+        font-size: 16px;
+        line-height: 1.45;
+        padding: 24px 28px;
+        white-space: pre;
+        overflow: hidden;
+        z-index: 9999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 180ms linear;
+        cursor: none;
+      }
+      .boot-screen.show{
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .boot-screen.fade-out{
+        opacity: 0;
+        transition: opacity 320ms linear;
+      }
+      .boot-screen *{ cursor: none; }
+      .boot-screen div:empty::before{ content: "\00a0"; }
+      .boot-cursor{
+        display: inline-block;
+        width: 0.6em;
+        height: 1em;
+        background: #f5f5f5;
+        vertical-align: -2px;
+        animation: boot-blink 1s steps(2, start) infinite;
+      }
+      @keyframes boot-blink{
+        to { visibility: hidden; }
+      }
     </style>
   </head>
 
@@ -300,6 +340,8 @@
       </div>
     </div>
 
+    <div id="boot" class="boot-screen" aria-hidden="true"></div>
+
     <script>
       // Skip login if the gate cookie is already valid for this browser
       (function () {
@@ -349,6 +391,55 @@
         msg.className = type ? type : "";
       }
 
+      // Wow-factor B: BIOS/POST overlay shown once between login success and redirect.
+      // Returning visitors are redirected by the checkGate() IIFE above and never see this.
+      function runBootSequence(firstName) {
+        const boot = document.getElementById("boot");
+        if (!boot) return Promise.resolve();
+
+        const name = (firstName || "guest").slice(0, 40);
+        const cols = 52; // padded width for dotted leaders
+        const pad = (label, status) => {
+          const dots = ".".repeat(Math.max(3, cols - label.length - status.length));
+          return label + " " + dots + " " + status;
+        };
+
+        const lines = [
+          { text: "FAFO BIOS v1.0", at: 0 },
+          { text: pad("Memory check", "640K OK"), at: 250 },
+          { text: pad("Verifying gate cookie", "OK"), at: 500 },
+          { text: pad("Establishing session", "OK"), at: 750 },
+          { text: "", at: 1000 },
+          { text: "Welcome, " + name + ".", at: 1150 },
+          { text: "", at: 1700 },
+          { text: "Loading desktop", at: 1700, withCursor: true },
+        ];
+
+        boot.textContent = "";
+        boot.classList.add("show");
+
+        const timers = [];
+        return new Promise((resolve) => {
+          for (const line of lines) {
+            timers.push(setTimeout(() => {
+              const div = document.createElement("div");
+              div.textContent = line.text;
+              if (line.withCursor) {
+                const cur = document.createElement("span");
+                cur.className = "boot-cursor";
+                div.appendChild(document.createTextNode(" "));
+                div.appendChild(cur);
+              }
+              boot.appendChild(div);
+            }, line.at));
+          }
+          timers.push(setTimeout(() => {
+            boot.classList.add("fade-out");
+          }, 2200));
+          timers.push(setTimeout(resolve, 2520));
+        });
+      }
+
       f.addEventListener("submit", async (e) => {
         e.preventDefault();
         setMsg("Connecting…", "");
@@ -384,9 +475,9 @@
             return;
           }
 
-          // TODO (wow-factor B): replace immediate redirect with a boot sequence transition.
-          setMsg("Access granted. Redirecting…", "ok");
+          setMsg("Access granted.", "ok");
           localStorage.setItem("fafo_access", "1");
+          await runBootSequence(firstName);
           window.location.assign(next);
         } catch (err) {
           console.error(err);
