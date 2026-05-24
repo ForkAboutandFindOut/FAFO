@@ -43,15 +43,27 @@ So the gate is mailing-list capture, not authentication — anyone can type any 
 - First/last name fields are **concatenated client-side** into a single `name` string before POST to `/api/subscribe`. The Supabase `mailing_list` table still stores `name`. Splitting into `first_name`/`last_name` columns is a propose-first change to `subscribe.ts` + schema.
 - Checkbox is 18×18 with `accent-color: #000080`. A JS click handler on `.checkrow` toggles the box from clicks **anywhere on the row** (label, gap, emoji); clicks on the checkbox itself fall through to native — no double-toggle.
 - Custom FAFO cursor everywhere via `*{ cursor: url(...) 0 0, auto }`. Don't override with `pointer` — visual consistency wins over click affordance.
-- Submit handler has a `// TODO (wow-factor B)` marker at the immediate-redirect line — the boot sequence hooks in there.
+- On successful submit, `runBootSequence(firstName)` plays before the redirect (see Boot sequence below).
 
 ## Wow-factor roadmap
 
 Path to the "Aesthetic direction" desktop-sim goal. Phased:
 
 - **A — Login as Win98 dialog.** Done, deployed (see Login dialog above).
-- **B — Boot sequence transition** (next). After login submit succeeds, intercept the redirect and show a brief BIOS/POST sequence (memory check, gate verify, "Welcome, <Name>", fade to homepage). Triggered once per session — returning visitors with `localStorage.fafo_access=1` skip it. Hook point already marked in the login submit handler.
+- **B — Boot sequence transition.** Done, deployed (see Boot sequence below).
 - **E — Floating decorative desktop windows** (deferred). Ambient windows scattered behind main content (Solitaire auto-playing, MS Paint of logo, Notepad with guest quote). Pairs with the eventual full desktop sim.
+
+## Boot sequence
+
+Plays once between login-submit success and the homepage redirect. ~3.5s total. Lives entirely in `docs/login/index.html` — CSS `.boot-screen` + JS `runBootSequence(firstName)`. Returning visitors are caught by the existing `checkGate()` IIFE at the top of the file and never see it (no `sessionStorage` flag needed).
+
+- **Font:** Pixel Operator 8 (already in `/assets/`) at 16px — clean 2× of its native 8px so it stays crisp. `text-shadow: 1px 0 0 currentColor` simulates bold without faux-bolding the pixel glyphs, which would look terrible.
+- **Typing uses `requestAnimationFrame`, not `setTimeout`.** Per-char `setTimeout(fn, ~11ms)` gets clamped to ~16ms+ on most browsers and aggressively throttled in background tabs — would stretch a 3.5s sequence to 15s+. rAF runs at the display refresh rate and adds however many chars the requested `cps` requires per frame.
+- **No fade-out.** The boot screen stays at `opacity: 1` right up until `window.location.assign(next)` fires, so the login dialog underneath never flashes through during the transition. A fade-out version was tried; it visibly leaked the dialog for ~300ms.
+- **Tuning knobs** are the `lines` array inside `runBootSequence`: `cps` (chars/sec per line) and `gapAfter` (post-line pause in ms). Bumping all three POST-line `cps` by +20 shaves ~225ms.
+- **On viewports narrower than ~880px** the 54-char POST lines clip on the right. Intentional — desktop-first per Aesthetic direction; mobile "just needs to not break" and clipped text isn't broken.
+
+**Preview-tool caveat:** Claude Preview / headless Chrome heavily throttles `requestAnimationFrame` when the tab isn't focused, making the sequence appear 5–10× slower than reality. Trust the math (sum of `text.length/cps + gapAfter`), not preview wall-clock timings. The DOM state after the Promise resolves is reliable; per-frame timing isn't.
 
 ## Workflow facts
 
