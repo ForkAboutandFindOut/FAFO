@@ -30,6 +30,8 @@ So the gate is mailing-list capture, not authentication — anyone can type any 
 
 **Env vars (Cloudflare Pages dashboard):** `GATE_COOKIE_SECRET` (signs cookies — critical), `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (used by `/api/subscribe` — full DB admin).
 
+**Supabase free-tier auto-pause:** the project pauses after ~1 week of inactivity. Symptom: `POST /api/subscribe` returns Cloudflare's plain-text `502` (not the function's JSON), so the login form shows the generic "Something went wrong." fallback. Fix: Supabase dashboard → Restore project, wait ~1 min, retry. `subscribe.ts` wraps its body in a top-level try/catch so other runtime errors return a real JSON `{ok:false, error, details}` instead of falling through to Cloudflare's 502 — but a paused project still won't accept writes. Prevention: `.github/workflows/keepalive-supabase.yml` pings the REST API every 3 days (needs `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` set as GitHub Actions secrets).
+
 ## Aesthetic direction
 
 90s "windowcore", vibes-based (not strict Win98). Goal: full desktop simulation (taskbar, multiple windows, possibly Start menu) with modern UX underneath — no fake loading delays, no ironic gimmicks. Reference points: 98.css, 7.gui, aesthetic.computer. Done-state = "first friend reaction is 'whoa'". Desktop-first; mobile just needs to not break.
