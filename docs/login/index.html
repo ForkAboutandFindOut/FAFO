@@ -421,14 +421,14 @@
         // POST status lines stream fast (real BIOS feel); welcome + loading
         // slow down to land with weight.
         const lines = [
-          { text: "FAFO BIOS v1.0",                        cps: 30, gapAfter: 200 },
-          { text: pad("Memory check", "640K OK"),          cps: 90, gapAfter: 80  },
-          { text: pad("Verifying gate cookie", "OK"),      cps: 90, gapAfter: 80  },
-          { text: pad("Establishing session", "OK"),       cps: 90, gapAfter: 200 },
-          { text: "",                                                 gapAfter: 100 },
-          { text: "Welcome, " + name + ".",                cps: 35, gapAfter: 300 },
-          { text: "",                                                 gapAfter: 100 },
-          { text: "Loading desktop",                       cps: 40, gapAfter: 400, leaveCursor: true },
+          { text: "FAFO BIOS v1.0",                        cps: 40,  gapAfter: 150 },
+          { text: pad("Memory check", "640K OK"),          cps: 120, gapAfter: 60  },
+          { text: pad("Verifying gate cookie", "OK"),      cps: 120, gapAfter: 60  },
+          { text: pad("Establishing session", "OK"),       cps: 120, gapAfter: 150 },
+          { text: "",                                                  gapAfter: 80  },
+          { text: "Welcome, " + name + ".",                cps: 45,  gapAfter: 250 },
+          { text: "",                                                  gapAfter: 80  },
+          { text: "Loading desktop",                       cps: 55,  gapAfter: 350, leaveCursor: true },
         ];
 
         boot.textContent = "";
