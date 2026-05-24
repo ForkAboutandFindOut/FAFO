@@ -242,10 +242,6 @@
         opacity: 1;
         pointer-events: auto;
       }
-      .boot-screen.fade-out{
-        opacity: 0;
-        transition: opacity 320ms linear;
-      }
       .boot-screen *{ cursor: none; }
       .boot-screen div:empty::before{ content: "\00a0"; }
       .boot-cursor{
@@ -433,10 +429,9 @@
               boot.appendChild(div);
             }, line.at));
           }
-          timers.push(setTimeout(() => {
-            boot.classList.add("fade-out");
-          }, 2200));
-          timers.push(setTimeout(resolve, 2520));
+          // No fade-out: cut straight from boot to the next page so the user
+          // never glimpses the login dialog underneath during the transition.
+          timers.push(setTimeout(resolve, 2300));
         });
       }
 
