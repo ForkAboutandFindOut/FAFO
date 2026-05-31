@@ -316,8 +316,10 @@
   .hero-wrap .hero-window {
     width: clamp(420px, 40vw, 700px);
   }
+  /* No aspect-ratio override: use the video's intrinsic 16:9 so the
+     border wraps snugly with no letterbox dead-space. (Earlier this was
+     forced 2.05/1 for a wider look; user reverted in 2026-05.) */
   .hero-wrap .hero-spin {
-    aspect-ratio: 2.05 / 1;
     height: auto;
   }
 
@@ -340,6 +342,13 @@
   }
   .solitaire-window .dw-content {
     flex: 1;
+    /* min-height:0 lets the flex column shrink below the video's intrinsic
+       height; without it, the 1500x700 video forces dw-content past the
+       window's 62vh, pushing the statusbar (and its bottom-right grip)
+       outside the window's bottom border. overflow:hidden clips the
+       cover-fit video cleanly inside the recessed content panel. */
+    min-height: 0;
+    overflow: hidden;
     padding: 4px;
     display: flex;
   }
@@ -352,8 +361,11 @@
   .episodes-window {
     position: absolute;
     left: 16px;
-    top: 60vh;                          /* pulled down so it no longer
-                                            overlaps the hero vertically */
+    /* max(60vh, 580px): 60vh keeps the original tall-viewport spacing;
+       the 580px floor prevents the hero from overlapping episodes at
+       common heights (≤~960px), where 60vh isn't enough to clear the
+       16:9 hero + intro text. */
+    top: max(60vh, 580px);
     width: clamp(468px, 52vw, 910px);   /* +30% on every clamp value */
     height: 75vh;                       /* +29% from prior 58vh */
     z-index: 1;
