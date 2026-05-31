@@ -10,6 +10,7 @@ Interview series in tech / AI / company creation. Live site: https://forkaboutan
 ## Layout
 
 - `docs/` — static site (custom domain + GitHub Pages style). Entry is `docs/index.html`; the inline script at the top calls `/api/gate` and redirects to `/login/` if the visitor isn't allowed in.
+- `docs/desktop/windows.css` — Phase E.1 desktop windowed sim (Solitaire + Episodes window chrome + hero reflow). Linked from `index.html`. See "Desktop windowed sim" below.
 - `functions/` — Cloudflare Pages Functions (TypeScript). API routes: `gate`, `send-otp`, `subscribe`, `episodes/`. Auth callback at `auth/callback.ts`. Site-wide `_middleware.ts`.
 - `episodes.yml` — source of truth for the podcast feed.
 - `tools/generate_feed.py` — generates `docs/feed.xml` from `episodes.yml`.
@@ -51,7 +52,10 @@ Path to the "Aesthetic direction" desktop-sim goal. Phased:
 
 - **A — Login as Win98 dialog.** Done, deployed (see Login dialog above).
 - **B — Boot sequence transition.** Done, deployed (see Boot sequence below).
-- **E — Floating decorative desktop windows** (deferred). Ambient windows scattered behind main content (Solitaire auto-playing, MS Paint of logo, Notepad with guest quote). Pairs with the eventual full desktop sim.
+- **E.0 — Intro text inside the hero window, restyled as plain Win98 system text** (black on grey, no white-on-teal pixel-outline). Done. See `.intro` and `.fork-icon` in `docs/index.html`.
+- **E.1 — Desktop windowed sim.** Done. Solitaire background window + Episodes chrome wrapper + hero reflow + Win98 chrome detail (titlebar glyphs, window icons, toolbars, status bars, recessed content panels, custom scrollbar). See "Desktop windowed sim" below.
+- **E.2 — Real Solitaire video** (deferred). Record ~20-30s of Win98 Solitaire auto-playing as a muted looping `.webm` in any emulator, drop into the `.solitaire-felt` placeholder as `<video poster=…>` with autoplay/loop/muted/playsinline. E.1's markup is already set up for an additive change here.
+- **MS Paint window** (deferred, was Phase E original-scope). Wraps `/assets/fafo-logo.png` in Paint chrome with a fake toolbar/palette. Bottom-right of the desktop. Not currently in the layout.
 
 ## Boot sequence
 
@@ -64,6 +68,20 @@ Plays once between login-submit success and the homepage redirect. ~3.5s total. 
 - **On viewports narrower than ~880px** the 54-char POST lines clip on the right. Intentional — desktop-first per Aesthetic direction; mobile "just needs to not break" and clipped text isn't broken.
 
 **Preview-tool caveat:** Claude Preview / headless Chrome heavily throttles `requestAnimationFrame` when the tab isn't focused, making the sequence appear 5–10× slower than reality. Trust the math (sum of `text.length/cps + gapAfter`), not preview wall-clock timings. The DOM state after the Promise resolves is reliable; per-frame timing isn't.
+
+## Desktop windowed sim
+
+Phase E.1. CSS in `docs/desktop/windows.css` linked from `index.html`. Adds two windows: Solitaire `<aside class="desktop-window solitaire-window">` as a background "app" with green-felt placeholder, and Episodes `<section class="desktop-window episodes-window">` wrapping the existing `.episodes-grid`. The hero is repositioned on top.
+
+- **All three windows are `position: absolute`** (not `fixed`). They scroll together as one composition; their relative positions stay constant. Earlier iterations tried fixed-only and mixed fixed/absolute — absolute-on-all is what matched the desired "scroll the whole desktop together" feel. Don't switch back to fixed without re-checking the overhang/scroll behaviour.
+- **`body { min-height: 140vh }`** enables the document scroll. Empty teal below the bottom of Episodes is intentional. Overrides the inline `html, body { height: 100% }` rule.
+- **Hero width: `clamp(420px, 40vw, 700px)`** for fluid scaling. Tuned to land at ~577px when the viewport is 1440px (the design target). The video has `aspect-ratio: 2.05/1` so it stretches horizontally — intentional.
+- **Mobile (<880px) is byte-identical to pre-E.1.** Solitaire is `display: none`; the Episodes wrapper is `display: contents` (collapses out of layout, so the inner `.episodes-grid` flows as before). All desktop positioning lives inside `@media (min-width: 880px)`.
+- **Episodes internal scroll** via `overflow-y: auto` on `.dw-content`. Custom Win98 scrollbar styled via `::-webkit-scrollbar-*` (WebKit) and `scrollbar-color` (Firefox fallback).
+- **Win98 palette `--w98-*` is now duplicated in three files** (`docs/index.html`, `docs/login/index.html`, `docs/desktop/windows.css`). Worth extracting to `docs/assets/w98.css` if a fourth file needs the variables.
+- **Chrome class systems are NOT shared.** Hero uses the older `.window` / `.titlebar` / `.ctrl` classes from `index.html`'s inline styles. New windows use `.desktop-window` / `.dw-titlebar` / `.dw-ctrl` / `.dw-menubar` / `.dw-toolbar` / `.dw-content` / `.dw-statusbar` in `windows.css`. **Side effect:** hero's titlebar buttons stay blank because the glyph rules target `.dw-ctrl::after`, not `.ctrl`. If aligning hero, port the glyph CSS or migrate hero to the `.dw-*` system.
+- **Window structure (Solitaire + Episodes):** `dw-titlebar` (with `dw-title` + `dw-titlebar-controls`) → `dw-menubar` → `dw-toolbar` → `dw-content` (with recessed sunken border) → `dw-statusbar` (with `dw-status-cell` text panel and `dw-status-grip` sizing-grip SVG).
+- **Cursor was resized 32×32 → 19×19** so the custom cursor doesn't eat the area near browser window edges (was blocking Chrome window resize from the page edge).
 
 ## Workflow facts
 
