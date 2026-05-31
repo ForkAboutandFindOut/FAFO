@@ -36,9 +36,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 8px;
+  padding: 4px 8px;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 11px;            /* dialled down from 13px so 'Solitaire' /
+                                  'Episodes' read as small chrome labels
+                                  rather than headline text */
   user-select: none;
 }
 
@@ -114,11 +116,10 @@
 @media (min-width: 880px) {
 
   /* Make the document itself taller so the page has a vertical scroll.
-     All three windows are fixed, so scrolling just reveals empty teal
-     below — useful if/when more page content is added later. */
+     Bumped to 140vh to make room for the taller Episodes window below. */
   body {
     height: auto;
-    min-height: 130vh;
+    min-height: 140vh;
   }
 
   /* Hero. Width: 60% of 760 (= 456) then ×1.10 ×1.15 = 577px.
@@ -175,11 +176,10 @@
   .episodes-window {
     position: absolute;
     left: 16px;
-    top: 50vh;
-    width: clamp(360px, 40vw, 700px);   /* fluid like the hero; floor
-                                            keeps the 3-card grid readable
-                                            at narrow widths */
-    height: 58vh;
+    top: 60vh;                          /* pulled down so it no longer
+                                            overlaps the hero vertically */
+    width: clamp(468px, 52vw, 910px);   /* +30% on every clamp value */
+    height: 75vh;                       /* +29% from prior 58vh */
     z-index: 1;
     display: flex;
     flex-direction: column;
