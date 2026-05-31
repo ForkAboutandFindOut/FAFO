@@ -1,0 +1,192 @@
+/* ------------------------------------------------------------------
+   Phase E.1 — desktop windowed layout.
+
+   Adds two new windows (Solitaire background, Episodes chrome wrapper)
+   and repositions the hero on desktop viewports (≥880px).
+   Below 880px every desktop rule is reverted: Solitaire is hidden and
+   the Episodes wrapper collapses to display:contents so today's
+   flat-grid layout is byte-for-byte preserved on mobile.
+   ------------------------------------------------------------------ */
+
+
+/* --- Shared Win98 chrome (--w98-* vars are duplicated from index.html;
+       worth extracting if a fourth file needs them) ----------------- */
+
+.desktop-window {
+  --w98-face: #c0c0c0;
+  --w98-shadow: #808080;
+  --w98-hilite: #ffffff;
+  --w98-title: #000080;
+  --w98-title-text: #ffffff;
+  --w98-text: #000000;
+
+  background: var(--w98-face);
+  border: 2px solid var(--w98-hilite);
+  box-shadow:
+    inset -2px -2px 0 var(--w98-shadow),
+    inset  2px  2px 0 var(--w98-hilite),
+    2px 2px 0 #000;
+  font-family: "MS Sans Serif", Tahoma, Verdana, Arial, sans-serif;
+  color: var(--w98-text);
+}
+
+.dw-titlebar {
+  background: var(--w98-title);
+  color: var(--w98-title-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  font-weight: 700;
+  font-size: 13px;
+  user-select: none;
+}
+
+.dw-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dw-titlebar-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.dw-ctrl {
+  width: 18px;
+  height: 18px;
+  background: var(--w98-face);
+  border: 2px solid var(--w98-hilite);
+  box-shadow:
+    inset -2px -2px 0 var(--w98-shadow),
+    inset  2px  2px 0 var(--w98-hilite);
+}
+
+.dw-menubar {
+  display: flex;
+  gap: 14px;
+  padding: 3px 10px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--w98-shadow);
+  user-select: none;
+}
+
+.dw-menu-item::first-letter {
+  text-decoration: underline; /* Win98 Alt-shortcut hint */
+}
+
+.dw-content {
+  padding: 8px;
+}
+
+/* Solitaire green felt — placeholder until E.2 replaces with <video> */
+.solitaire-felt {
+  background: #008000;
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+}
+
+
+/* --- Mobile (≤879px): hide the desktop sim entirely ---------------- */
+
+@media (max-width: 879.98px) {
+  .solitaire-window {
+    display: none;
+  }
+
+  /* display:contents = the wrapper vanishes from layout; children
+     (.episodes-grid) flow as if the wrapper weren't there. This is
+     how the mobile path remains identical to today. */
+  .episodes-window {
+    display: contents;
+  }
+  .episodes-window .dw-titlebar,
+  .episodes-window .dw-menubar {
+    display: none;
+  }
+}
+
+
+/* --- Desktop (≥880px): the windowed layout ------------------------- */
+
+@media (min-width: 880px) {
+
+  /* Make the document itself taller so the page has a vertical scroll.
+     All three windows are fixed, so scrolling just reveals empty teal
+     below — useful if/when more page content is added later. */
+  body {
+    height: auto;
+    min-height: 130vh;
+  }
+
+  /* Hero. Width: 60% of 760 (= 456) then ×1.10 ×1.15 = 577px.
+     position:absolute so it scrolls with the page; the three windows
+     keep fixed positions *relative to each other*. */
+  .hero-wrap {
+    position: absolute;
+    top: 24px;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    padding: 0 16px;
+  }
+  .hero-wrap .hero-window {
+    width: min(577px, 100%);
+  }
+  .hero-wrap .hero-spin {
+    aspect-ratio: 2.05 / 1;
+    height: auto;
+  }
+
+  /* Solitaire — large background window. Width 72vw, shifted right
+     (left:28vw flush with viewport's right edge). Pushed down so the
+     hero sits mostly above Solitaire's body; top-left corner pokes out
+     in the upper-left region, visible above Episodes and left of Hero. */
+  .solitaire-window {
+    position: absolute;
+    left: calc(25vw - 20px);   /* 25vw base, shifted 20px further left */
+    width: 72vw;
+    top: 37vh;
+    height: 62vh;              /* was top:37vh + bottom:1vh; switched to
+                                  explicit height so absolute positioning
+                                  doesn't get pinned to the (taller) body
+                                  via the bottom anchor. */
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .solitaire-window .dw-content {
+    flex: 1;
+    padding: 4px;
+    display: flex;
+  }
+
+  /* Episodes — absolute, top:50vh, height 58vh. Bottom sits 85px below
+     Solitaire's bottom (so the box physically overhangs Solitaire). At
+     scroll 0 the overhang is mostly clipped by viewport bottom; scroll
+     the page down to bring it into view. Cards inside still scroll
+     internally via .dw-content's overflow-y:auto. */
+  .episodes-window {
+    position: absolute;
+    left: 16px;
+    top: 50vh;
+    width: 40vw;
+    height: 58vh;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .episodes-window .dw-content {
+    flex: 1;
+    overflow-y: auto;          /* internal scroll when episodes overflow */
+    padding: 10px;
+  }
+
+  /* Three-column picture-card grid inside the Episodes window. */
+  .episodes-window .episodes-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+}

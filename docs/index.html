@@ -38,6 +38,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Fork About and Find Out</title>
 
+    <link rel="stylesheet" href="/desktop/windows.css" />
+
     <style>
       @font-face{
         font-family: "Pixel Operator 8";
@@ -315,6 +317,25 @@
 
   <body>
 
+    <!-- Phase E.1: ambient background "Solitaire" window (desktop only) -->
+    <aside class="desktop-window solitaire-window" aria-hidden="true">
+      <div class="dw-titlebar">
+        <div class="dw-title">Solitaire</div>
+        <div class="dw-titlebar-controls">
+          <div class="dw-ctrl"></div>
+          <div class="dw-ctrl"></div>
+          <div class="dw-ctrl"></div>
+        </div>
+      </div>
+      <div class="dw-menubar">
+        <span class="dw-menu-item">Game</span>
+        <span class="dw-menu-item">Help</span>
+      </div>
+      <div class="dw-content">
+        <div class="solitaire-felt"></div>
+      </div>
+    </aside>
+
     <header class="hero-wrap">
       <div class="window hero-window" role="region" aria-label="FAFO Logo">
         <div class="titlebar">
@@ -346,6 +367,23 @@
       </div>
     </header>
 
+    <!-- Phase E.1: episodes wrapped in Win98 window chrome on desktop.
+         At <880px the .episodes-window collapses to display:contents so
+         the .episodes-grid renders identically to today. -->
+    <section class="desktop-window episodes-window" aria-label="Episodes window">
+      <div class="dw-titlebar">
+        <div class="dw-title">Episodes</div>
+        <div class="dw-titlebar-controls">
+          <div class="dw-ctrl"></div>
+          <div class="dw-ctrl"></div>
+          <div class="dw-ctrl"></div>
+        </div>
+      </div>
+      <div class="dw-menubar">
+        <span class="dw-menu-item">File</span>
+        <span class="dw-menu-item">View</span>
+      </div>
+      <div class="dw-content">
     <div class="episodes-grid" aria-label="Episodes">
             <article
               class="episode-card"
@@ -509,6 +547,8 @@
               <div class="episode-details"></div>
             </article>
     </div>
+      </div>
+    </section>
 
     <div class="episode-tooltip" id="episodeTooltip" aria-hidden="true">
       <div class="episode-tooltip-title" id="episodeTooltipTitle"></div>
