@@ -213,12 +213,15 @@
   background-repeat: no-repeat;
 }
 
-/* Solitaire green felt — placeholder until E.2 replaces with <video> */
+/* Solitaire green felt — Phase E.2 <video>. Falls back to flat #008000
+   before the video paints or if it fails to load. */
 .solitaire-felt {
   background: #008000;
   width: 100%;
   height: 100%;
   min-height: 200px;
+  display: block;
+  object-fit: cover; /* fill area, crop slight excess (source is 1500x700 ~2.14:1, container ~2.2:1) */
 }
 
 /* --- Win98-style scrollbar inside Episodes' content area ----------
