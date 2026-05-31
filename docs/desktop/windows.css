@@ -132,8 +132,12 @@
     z-index: 2;
     padding: 0 16px;
   }
+  /* clamp(min, preferred, max) lets the hero scale with viewport between
+     a floor and ceiling. 40vw hits ~577px at 1440 viewport (your full-
+     screen tuning), shrinks gracefully on narrow windows (down to 420),
+     and stops at 700 so it doesn't dominate ultra-wide screens. */
   .hero-wrap .hero-window {
-    width: min(577px, 100%);
+    width: clamp(420px, 40vw, 700px);
   }
   .hero-wrap .hero-spin {
     aspect-ratio: 2.05 / 1;
@@ -172,7 +176,9 @@
     position: absolute;
     left: 16px;
     top: 50vh;
-    width: 40vw;
+    width: clamp(360px, 40vw, 700px);   /* fluid like the hero; floor
+                                            keeps the 3-card grid readable
+                                            at narrow widths */
     height: 58vh;
     z-index: 1;
     display: flex;
