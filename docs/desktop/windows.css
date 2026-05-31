@@ -56,6 +56,7 @@
 }
 
 .dw-ctrl {
+  position: relative;
   width: 18px;
   height: 18px;
   background: var(--w98-face);
@@ -63,6 +64,66 @@
   box-shadow:
     inset -2px -2px 0 var(--w98-shadow),
     inset  2px  2px 0 var(--w98-hilite);
+}
+
+/* Glyphs inside the titlebar buttons (minimize / maximize / close). */
+.dw-titlebar-controls .dw-ctrl::after {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #000;
+  line-height: 1;
+}
+.dw-titlebar-controls .dw-ctrl:nth-child(1)::after {
+  content: '';
+  /* underscore sitting at the bottom = Win98 minimize glyph */
+  width: 7px;
+  height: 2px;
+  background: #000;
+  align-self: flex-end;
+  margin: 0 auto 2px;
+}
+.dw-titlebar-controls .dw-ctrl:nth-child(2)::after {
+  /* hollow square = maximize */
+  content: '';
+  width: 8px;
+  height: 7px;
+  border: 1px solid #000;
+  border-top-width: 2px;
+}
+.dw-titlebar-controls .dw-ctrl:nth-child(3)::after {
+  content: '\00D7';   /* multiplication sign as the X */
+  font-size: 13px;
+}
+
+/* Small program icon next to the title text. */
+.dw-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.dw-title::before {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  flex: 0 0 14px;
+}
+.solitaire-window .dw-title::before {
+  /* mini playing card with spade */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><rect x="2" y="1" width="10" height="12" fill="white" stroke="black"/><text x="7" y="11" font-family="serif" font-size="11" font-weight="bold" text-anchor="middle" fill="black">%E2%99%A0</text></svg>');
+}
+.episodes-window .dw-title::before {
+  /* folder */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 12"><path d="M1 3 L5 3 L6 2 L13 2 L13 11 L1 11 Z" fill="%23e8c44a" stroke="black" stroke-width="0.5"/></svg>');
+  height: 12px;
 }
 
 .dw-menubar {
@@ -78,8 +139,78 @@
   text-decoration: underline; /* Win98 Alt-shortcut hint */
 }
 
+/* --- Toolbar (between menubar and content) ------------------------- */
+
+.dw-toolbar {
+  display: flex;
+  gap: 2px;
+  padding: 3px 6px;
+  background: var(--w98-face);
+  border-top: 1px solid var(--w98-hilite);
+  border-bottom: 1px solid var(--w98-shadow);
+  user-select: none;
+  align-items: center;
+}
+
+.dw-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  font-size: 13px;
+  background: var(--w98-face);
+  border: 1px solid;
+  border-color: var(--w98-hilite) var(--w98-shadow) var(--w98-shadow) var(--w98-hilite);
+}
+
+.dw-tool-sep {
+  width: 0;
+  height: 18px;
+  border-left: 1px solid var(--w98-shadow);
+  border-right: 1px solid var(--w98-hilite);
+  margin: 0 4px;
+}
+
 .dw-content {
   padding: 8px;
+  background: var(--w98-face);
+  /* recessed/sunken bevel: dark on top+left, light on bottom+right
+     (inverse of the raised window chrome above). Adds an inner border
+     that reads as a Win98 "list view" / "client area" panel. */
+  border-style: solid;
+  border-width: 2px;
+  border-color: var(--w98-shadow) var(--w98-hilite) var(--w98-hilite) var(--w98-shadow);
+  margin: 3px;
+}
+
+/* --- Status bar (bottom of each window) ----------------------------- */
+
+.dw-statusbar {
+  display: flex;
+  gap: 4px;
+  padding: 3px 4px 4px;
+  font-size: 11px;
+  user-select: none;
+  align-items: stretch;
+  border-top: 1px solid var(--w98-hilite);
+}
+
+.dw-status-cell {
+  flex: 1;
+  padding: 1px 6px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--w98-shadow) var(--w98-hilite) var(--w98-hilite) var(--w98-shadow);
+}
+
+.dw-status-grip {
+  width: 14px;
+  height: 14px;
+  align-self: flex-end;
+  /* three diagonal lines in the bottom-right — the Win98 sizing grip */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><path d="M0 14 L14 0" stroke="%23808080" stroke-width="1.5"/><path d="M5 14 L14 5" stroke="%23808080" stroke-width="1.5"/><path d="M10 14 L14 10" stroke="%23808080" stroke-width="1.5"/></svg>');
+  background-repeat: no-repeat;
 }
 
 /* Solitaire green felt — placeholder until E.2 replaces with <video> */
@@ -88,6 +219,48 @@
   width: 100%;
   height: 100%;
   min-height: 200px;
+}
+
+/* --- Win98-style scrollbar inside Episodes' content area ----------
+   WebKit only; Firefox gets a basic scrollbar-color treatment below. */
+.episodes-window .dw-content::-webkit-scrollbar {
+  width: 16px;
+}
+.episodes-window .dw-content::-webkit-scrollbar-track {
+  background-color: var(--w98-face);
+  background-image:
+    repeating-linear-gradient(0deg,  #aaa 0 1px, transparent 1px 2px),
+    repeating-linear-gradient(90deg, #aaa 0 1px, transparent 1px 2px);
+}
+.episodes-window .dw-content::-webkit-scrollbar-thumb {
+  background: var(--w98-face);
+  border: 2px solid;
+  border-color: var(--w98-hilite) var(--w98-shadow) var(--w98-shadow) var(--w98-hilite);
+  box-shadow: inset -1px -1px 0 var(--w98-shadow), inset 1px 1px 0 var(--w98-hilite);
+}
+.episodes-window .dw-content::-webkit-scrollbar-button {
+  height: 16px;
+  background-color: var(--w98-face);
+  border: 2px solid;
+  border-color: var(--w98-hilite) var(--w98-shadow) var(--w98-shadow) var(--w98-hilite);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.episodes-window .dw-content::-webkit-scrollbar-button:vertical:start:decrement {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 8"><path d="M5 1 L1 6 L9 6 Z" fill="black"/></svg>');
+}
+.episodes-window .dw-content::-webkit-scrollbar-button:vertical:end:increment {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 8"><path d="M5 7 L1 2 L9 2 Z" fill="black"/></svg>');
+}
+.episodes-window .dw-content::-webkit-scrollbar-button:vertical:start:increment,
+.episodes-window .dw-content::-webkit-scrollbar-button:vertical:end:decrement {
+  display: none;   /* hide the "double" buttons WebKit reserves */
+}
+
+/* Firefox fallback */
+.episodes-window .dw-content {
+  scrollbar-width: auto;
+  scrollbar-color: var(--w98-face) #aaa;
 }
 
 

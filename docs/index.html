@@ -110,6 +110,16 @@
           text-align: center;
         }
 
+    /* Black outline on the fork emoji so it reads against the grey
+       window face on systems where emoji render as flat/dark glyphs. */
+    .fork-icon{
+      text-shadow:
+        -1px -1px 0 #000000,
+         1px -1px 0 #000000,
+        -1px  1px 0 #000000,
+         1px  1px 0 #000000;
+    }
+
     .guest-desc{
       font-size: 14px;
       font-weight: 600;
@@ -331,8 +341,18 @@
         <span class="dw-menu-item">Game</span>
         <span class="dw-menu-item">Help</span>
       </div>
+      <div class="dw-toolbar">
+        <span class="dw-tool-btn" title="New game">&spades;</span>
+        <span class="dw-tool-btn" title="Restart">&#x21BB;</span>
+        <span class="dw-tool-sep"></span>
+        <span class="dw-tool-btn" title="Help">?</span>
+      </div>
       <div class="dw-content">
         <div class="solitaire-felt"></div>
+      </div>
+      <div class="dw-statusbar">
+        <span class="dw-status-cell">Game in progress</span>
+        <span class="dw-status-grip"></span>
       </div>
     </aside>
 
@@ -361,7 +381,7 @@
             Welcome to Fork About and Find Out where we do... exactly that. I'm running a series of interviews with people working (roughly) within tech and entrepreneurship.
           </p>
           <p class="intro">
-            The rules end there. Browse this site to find out more 🍴
+            The rules end there. Browse this site to find out more <span class="fork-icon">🍴</span>
           </p>
         </div>
       </div>
@@ -382,6 +402,13 @@
       <div class="dw-menubar">
         <span class="dw-menu-item">File</span>
         <span class="dw-menu-item">View</span>
+      </div>
+      <div class="dw-toolbar">
+        <span class="dw-tool-btn" title="Back">&#x25C0;</span>
+        <span class="dw-tool-btn" title="Forward">&#x25B6;</span>
+        <span class="dw-tool-sep"></span>
+        <span class="dw-tool-btn" title="Refresh">&#x21BB;</span>
+        <span class="dw-tool-btn" title="Search">?</span>
       </div>
       <div class="dw-content">
     <div class="episodes-grid" aria-label="Episodes">
@@ -547,6 +574,10 @@
               <div class="episode-details"></div>
             </article>
     </div>
+      </div>
+      <div class="dw-statusbar">
+        <span class="dw-status-cell">6 episode(s)</span>
+        <span class="dw-status-grip"></span>
       </div>
     </section>
 
