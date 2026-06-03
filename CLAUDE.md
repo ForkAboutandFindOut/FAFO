@@ -10,7 +10,7 @@ Interview series in tech / AI / company creation. Live site: https://forkaboutan
 ## Layout
 
 - `docs/` — static site (custom domain + GitHub Pages style). Entry is `docs/index.html`; the inline script at the top calls `/api/gate` and redirects to `/login/` if the visitor isn't allowed in.
-- `docs/desktop/windows.css` — Phase E.1 desktop windowed sim (Solitaire + Episodes window chrome + hero reflow). Linked from `index.html`. See "Desktop windowed sim" below.
+- `docs/desktop/windows.css` + `docs/desktop/desktop.js` — desktop windowed sim (Win98-style desktop with icons + draggable, focusable, scale-animated windows). Both linked from `index.html`. See "Desktop windowed sim" below.
 - `functions/` — Cloudflare Pages Functions (TypeScript). API routes: `gate`, `send-otp`, `subscribe`, `episodes/`. Auth callback at `auth/callback.ts`. Site-wide `_middleware.ts`.
 - `episodes.yml` — source of truth for the podcast feed.
 - `tools/generate_feed.py` — generates `docs/feed.xml` from `episodes.yml`.
@@ -48,14 +48,16 @@ So the gate is mailing-list capture, not authentication — anyone can type any 
 
 ## Wow-factor roadmap
 
-Path to the "Aesthetic direction" desktop-sim goal. Phased:
+Path to the "Aesthetic direction" desktop-sim goal:
 
-- **A — Login as Win98 dialog.** Done, deployed (see Login dialog above).
-- **B — Boot sequence transition.** Done, deployed (see Boot sequence below).
-- **E.0 — Intro text inside the hero window, restyled as plain Win98 system text** (black on grey, no white-on-teal pixel-outline). Done. See `.intro` and `.fork-icon` in `docs/index.html`.
-- **E.1 — Desktop windowed sim.** Done. Solitaire background window + Episodes chrome wrapper + hero reflow + Win98 chrome detail (titlebar glyphs, window icons, toolbars, status bars, recessed content panels, custom scrollbar). See "Desktop windowed sim" below.
-- **E.2 — Real Solitaire video** (deferred). Record ~20-30s of Win98 Solitaire auto-playing as a muted looping `.webm` in any emulator, drop into the `.solitaire-felt` placeholder as `<video poster=…>` with autoplay/loop/muted/playsinline. E.1's markup is already set up for an additive change here.
-- **MS Paint window** (deferred, was Phase E original-scope). Wraps `/assets/fafo-logo.png` in Paint chrome with a fake toolbar/palette. Bottom-right of the desktop. Not currently in the layout.
+- **Login as Win98 dialog.** Done, deployed. See Login dialog above.
+- **Boot sequence transition.** Done, deployed. See Boot sequence below.
+- **Intro copy as Win98 system text.** Done. Lived briefly in the hero window; now lives inside the Welcome window in the desktop sim.
+- **E.1 — Hero/Episodes/Solitaire fixed-position layout.** Superseded by the full desktop sim — the `.hero-wrap` markup and always-visible windows are gone.
+- **E.2 — Real Solitaire video.** Done. `docs/assets/solitaire.webm` (25s VP9 loop, 805 KiB), displayed inside the Solitaire app-window.
+- **Desktop sim Phases A–F.** Done on the `desktop-sim` branch (not yet merged to main). Skeleton + open/close + Welcome auto-open + drag + focus/z-index + open-close zoom animations + mobile + squeeze-resilient layout. See "Desktop windowed sim".
+- **Playable Solitaire game** (deferred). User explored; verdict was to vendor an MIT-licensed JS Klondike clone (~30–50 KB) into the Solitaire window, keeping the video as the idle-state aesthetic. Hold until after the desktop sim ships.
+- **MS Paint window** (deferred, was Phase E original-scope). Wraps `/assets/fafo-logo.png` in Paint chrome with a fake toolbar/palette.
 
 ## Boot sequence
 
@@ -71,17 +73,33 @@ Plays once between login-submit success and the homepage redirect. ~3.5s total. 
 
 ## Desktop windowed sim
 
-Phase E.1. CSS in `docs/desktop/windows.css` linked from `index.html`. Adds two windows: Solitaire `<aside class="desktop-window solitaire-window">` as a background "app" with green-felt placeholder, and Episodes `<section class="desktop-window episodes-window">` wrapping the existing `.episodes-grid`. The hero is repositioned on top.
+Lives on the `desktop-sim` branch. Files: `docs/index.html` (markup), `docs/desktop/windows.css` (style), `docs/desktop/desktop.js` (window manager, ~150 lines, vanilla, no deps).
 
-- **All three windows are `position: absolute`** (not `fixed`). They scroll together as one composition; their relative positions stay constant. Earlier iterations tried fixed-only and mixed fixed/absolute — absolute-on-all is what matched the desired "scroll the whole desktop together" feel. Don't switch back to fixed without re-checking the overhang/scroll behaviour.
-- **`body { min-height: 140vh }`** enables the document scroll. Empty teal below the bottom of Episodes is intentional. Overrides the inline `html, body { height: 100% }` rule.
-- **Hero width: `clamp(420px, 40vw, 700px)`** for fluid scaling. Tuned to land at ~577px when the viewport is 1440px (the design target). The video has `aspect-ratio: 2.05/1` so it stretches horizontally — intentional.
-- **Mobile (<880px) is byte-identical to pre-E.1.** Solitaire is `display: none`; the Episodes wrapper is `display: contents` (collapses out of layout, so the inner `.episodes-grid` flows as before). All desktop positioning lives inside `@media (min-width: 880px)`.
-- **Episodes internal scroll** via `overflow-y: auto` on `.dw-content`. Custom Win98 scrollbar styled via `::-webkit-scrollbar-*` (WebKit) and `scrollbar-color` (Firefox fallback).
-- **Win98 palette `--w98-*` is now duplicated in three files** (`docs/index.html`, `docs/login/index.html`, `docs/desktop/windows.css`). Worth extracting to `docs/assets/w98.css` if a fourth file needs the variables.
-- **Chrome class systems are NOT shared.** Hero uses the older `.window` / `.titlebar` / `.ctrl` classes from `index.html`'s inline styles. New windows use `.desktop-window` / `.dw-titlebar` / `.dw-ctrl` / `.dw-menubar` / `.dw-toolbar` / `.dw-content` / `.dw-statusbar` in `windows.css`. **Side effect:** hero's titlebar buttons stay blank because the glyph rules target `.dw-ctrl::after`, not `.ctrl`. If aligning hero, port the glyph CSS or migrate hero to the `.dw-*` system.
-- **Window structure (Solitaire + Episodes):** `dw-titlebar` (with `dw-title` + `dw-titlebar-controls`) → `dw-menubar` → `dw-toolbar` → `dw-content` (with recessed sunken border) → `dw-statusbar` (with `dw-status-cell` text panel and `dw-status-grip` sizing-grip SVG).
-- **Cursor was resized 32×32 → 19×19** so the custom cursor doesn't eat the area near browser window edges (was blocking Chrome window resize from the page edge).
+**Structure.** `<main class="desktop">` contains: ambient spinning logo (`<video class="ambient-logo">`, transparent VP8-alpha webm, 80vmin, opacity 0.35); icon strip top-left (`<ul class="desktop-icons">`, currently Episodes + Solitaire); three `<section class="app-window" data-window="…" hidden>` (Welcome, Solitaire, Episodes). Icons unhide the corresponding window on click. Welcome auto-opens on first visit.
+
+**Window chrome classes**: `.dw-titlebar` / `.dw-menubar` / `.dw-toolbar` / `.dw-content` / `.dw-statusbar` / `.dw-ctrl`. Same system as the prior E.1.
+
+**JS behaviour (`desktop.js`):**
+
+- Bails entirely on `<880px` viewport (mobile path handled by CSS).
+- Welcome auto-opens unless `localStorage.fafo_welcome_closed` is set; closing Welcome writes that flag.
+- Open/close zoom: `setOriginFromIcon()` sets `transform-origin` to the icon's centre relative to the window. `.is-opening` instantly snaps to `scale(0.08) opacity(0)` via `transition: none`; rAF removes the class → CSS transitions back to scale(1) opacity(1). `.is-closing` does the reverse; `setTimeout(180ms)` then sets `hidden=true` and runs side-effects (pause Solitaire video, persist Welcome close).
+- Drag from `.dw-titlebar[data-drag-handle]` (ignored if click hits `.dw-titlebar-controls`). Mousedown reads `getBoundingClientRect`, writes inline `left`/`top`, **and clears `right`/`bottom`** — without that, the window only moves on one axis because the CSS pin still applies. Constraint: ≥80px of titlebar visible horizontally; titlebar can't go above y=0.
+- Focus on mousedown anywhere inside a window: monotonic `topZ` counter (starts at CSS baseline z-index 10) writes to inline `z-index`. `.is-focused` class on focused window; `:not(.is-focused) .dw-titlebar` dims to flat grey (`--w98-shadow`).
+
+**Mobile (<880px).** Desktop chrome (icons, ambient logo, Solitaire window) hidden via `display: none`. Welcome and Episodes wrappers `display: contents` so their inner content flows in normal document flow; titlebar/menubar hidden. **Welcome's `display: contents` selector must out-specify UA's `[hidden]`** (`.app-window[data-window="welcome"]` is 0,0,2,0 vs 0,0,1,0) because `desktop.js` bails before unhiding Welcome — otherwise mobile visitors see no intro text.
+
+**Squeeze resilience.** Episodes is the only window wide enough to crowd narrow desktop viewports. Uses `width: clamp(420px, 80vw, 720px)` and `left: clamp(40px, 10vw, 140px)` — original 720/140 at 1440px design target; shrinks to 704/88 at 880px (bumps right margin from 16 → 84). Solitaire and Welcome are right-pinned, no width fluidity needed.
+
+**Cache-bust.** `index.html` references `windows.css?v=phase-X` and `desktop.js?v=phase-X`. Bump the version label when iterating locally — Python's http.server sends no useful cache headers and browsers will hold onto stale scripts. Production deploys via Cloudflare don't need this (their cache is keyed differently); the `?v=` is harmless either way.
+
+**Win98 palette `--w98-*` is duplicated in three files** (`docs/index.html`, `docs/login/index.html`, `docs/desktop/windows.css`). Still worth extracting to `docs/assets/w98.css` if a fourth file needs them.
+
+**Assets used by the sim:**
+
+- `docs/assets/fafo-spin-transparent.webm` — 1.8 MB, VP8 alpha (`alpha_mode=1` matroska tag). `libvpx-vp9` silently dropped alpha; only `libvpx` (VP8) preserves it: `ffmpeg -i src.mov -c:v libvpx -pix_fmt yuva420p -auto-alt-ref 0 -an out.webm`. Source is `FAFO_SpinningLogo.mov` (ProRes 4444, yuva444p12le) in Drive's `Brand Assets/`.
+- `docs/assets/solitaire.webm` — 805 KiB, VP9, 25s loop, no alpha. Inside the Solitaire window's `.dw-content` with `object-fit: cover`.
+- `docs/assets/cursor.png` — pristine 32×32 from commit `bf9a4f5`. Earlier rescaling 32→19→21→32 via PIL had softened the pixel art; restore via `git show bf9a4f5:docs/assets/cursor.png > docs/assets/cursor.png` if it gets blurry again.
 
 ## Workflow facts
 
@@ -107,11 +125,13 @@ Static-only preview (enough for styling, no functions):
 cd docs && python3 -m http.server 8000
 ```
 
-Visit `http://localhost:8000/`. The gate's `/api/gate` call will 404; bypass once via DevTools console: `localStorage.setItem("fafo_access","1"); location.reload();`.
+Visit `http://localhost:8000/`. The gate's `/api/gate` call will 404; bypass once by visiting `/login/` (gate doesn't auto-redirect that page), opening DevTools, and running `localStorage.setItem("fafo_access","1")`, then navigating to `/`. The flag persists.
 
-For testing functions/auth locally, set up `wrangler` with a `.dev.vars` file (not done yet).
+For testing functions/auth locally, set up `wrangler` with a `.dev.vars` file (not done yet). For "is this actually working in prod" checks, push the working branch and use Cloudflare Pages' auto-deployed preview URL.
 
-**Preview-tool gotcha:** macOS sandboxes Claude's Python subprocesses from `~/Desktop/`, so the Claude Preview MCP can't serve files from this repo directly. To use `preview_start` / `preview_screenshot`, copy `docs/` to `/tmp/fafo-preview/` first and point `~/.claude/launch.json` at `--directory /tmp/fafo-preview`. The Bash `python3 -m http.server` invocation above is unaffected.
+**Cache-bust during JS iteration.** Python http.server sends no cache-control headers; browsers will serve stale `desktop.js` / `windows.css` for as long as they feel like it. `index.html` references those files with a `?v=phase-X` query — bump the label any time the file changes and the URL changes too, so the browser refetches. Alternative: keep DevTools open with "Disable cache" ticked.
+
+**Preview-tool gotcha:** macOS sandboxes Claude's Python subprocesses from `~/Desktop/`, so the Claude Preview MCP can't serve files from this repo directly. To use `preview_start` / `preview_screenshot`, copy `docs/` to `/tmp/fafo-preview/` first and point `~/.claude/launch.json` at `--directory /tmp/fafo-preview`. The Bash `python3 -m http.server` invocation above is unaffected. Also: the headless preview tab is treated as `document.hidden`, which **pauses CSS transitions and throttles `requestAnimationFrame` to ~0Hz** — animations and rAF-driven code (boot sequence, desktop sim open/close zoom) won't visibly run in the preview. Verify the DOM state at the end; trust the math; eyeball in a real browser for animation polish.
 
 ## Conventions
 
