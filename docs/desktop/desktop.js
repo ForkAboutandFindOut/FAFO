@@ -58,6 +58,15 @@
     windows[el.dataset.window] = el;
   });
 
+  // Episodes window statusbar: live count from the DOM, so adding/removing
+  // <article class="episode-card"> in index.html never gets out of sync
+  // with the displayed total.
+  const epStatusCell = document.querySelector('.episodes-window .dw-status-cell');
+  if (epStatusCell) {
+    const n = document.querySelectorAll('.episodes-window .episode-card').length;
+    epStatusCell.textContent = n + ' episode(s)';
+  }
+
   // --- Phase D: focus / z-index. topZ starts above the CSS baseline
   // (z-index:10) so the first focus bump (11) clears every default. ----
   let topZ = 10;

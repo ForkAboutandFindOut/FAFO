@@ -42,4 +42,10 @@ export const EPISODES: Episode[] = [
     r2_key: "episodes/ep006.mp3",
     filename: "FAFO_ep006_AarinPopat.mp3",
   },
+  {
+    id: "ep007",
+    title: "Fatema Al Khalifa",
+    r2_key: "episodes/ep007.mp3",
+    filename: "FAFO_ep007_FatemaAlKhalifa.mp3",
+  },
 ];

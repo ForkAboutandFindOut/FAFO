@@ -57,8 +57,8 @@
 
 .dw-ctrl {
   position: relative;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   background: var(--w98-face);
   border: 2px solid var(--w98-hilite);
   box-shadow:
@@ -66,38 +66,35 @@
     inset  2px  2px 0 var(--w98-hilite);
 }
 
-/* Glyphs inside the titlebar buttons (minimize / maximize / close). */
+/* Invisible hit-target extension. Pseudo-element sits 6px outside the
+   visible button in every direction, so the clickable area is ~34px even
+   though the chrome still looks 22px. Clicks on the pseudo bubble to the
+   parent button. Compensates for the FAFO cursor's hotspot at (0,0) —
+   the visible cursor body extends down-right of where clicks actually
+   register, so users tend to click slightly above-left of where they're
+   aiming. */
+.dw-ctrl::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
+/* Glyph inside the close button. Selecting via [data-close] (not nth-child)
+   so adding/removing other controls doesn't shift the glyph rule. */
 .dw-titlebar-controls .dw-ctrl::after {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: #000;
   line-height: 1;
 }
-.dw-titlebar-controls .dw-ctrl:nth-child(1)::after {
-  content: '';
-  /* underscore sitting at the bottom = Win98 minimize glyph */
-  width: 7px;
-  height: 2px;
-  background: #000;
-  align-self: flex-end;
-  margin: 0 auto 2px;
-}
-.dw-titlebar-controls .dw-ctrl:nth-child(2)::after {
-  /* hollow square = maximize */
-  content: '';
-  width: 8px;
-  height: 7px;
-  border: 1px solid #000;
-  border-top-width: 2px;
-}
-.dw-titlebar-controls .dw-ctrl:nth-child(3)::after {
+.dw-titlebar-controls .dw-ctrl[data-close]::after {
   content: '\00D7';   /* multiplication sign as the X */
-  font-size: 13px;
+  font-size: 16px;
 }
 
 /* Small program icon next to the title text. */
@@ -343,7 +340,14 @@
 
   .desktop {
     position: fixed;
-    inset: 0;
+    /* 16px inset leaves a teal frame at the viewport edge where body
+       (with no cursor of its own, inheriting `auto` from html) shows
+       the system cursor. Lets the browser's window-resize cursor take
+       over cleanly when sliding toward the Chrome tab edge. The teal
+       bg matches --w98-bg so the frame is invisible. 16px chosen to
+       give room for the 32px FAFO cursor body to clear out before the
+       user crosses into the resize zone. */
+    inset: 16px;
     z-index: 0;
   }
 
@@ -441,6 +445,10 @@
   .desktop-icon-glyph[data-glyph="cards"] {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" shape-rendering="crispEdges"><rect x="6" y="10" width="22" height="28" fill="white" stroke="black" stroke-width="1.5" transform="rotate(-10 17 24)"/><rect x="14" y="8" width="22" height="28" fill="white" stroke="black" stroke-width="1.5"/><text x="25" y="29" font-family="serif" font-size="20" font-weight="bold" text-anchor="middle" fill="black">%E2%99%A0</text></svg>');
   }
+  /* Win98 info circle — matches the icon shown in the Welcome titlebar. */
+  .desktop-icon-glyph[data-glyph="info"] {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" shape-rendering="crispEdges"><circle cx="22" cy="22" r="18" fill="white" stroke="black" stroke-width="1.5"/><text x="22" y="32" font-family="serif" font-size="28" font-weight="bold" font-style="italic" text-anchor="middle" fill="black">i</text></svg>');
+  }
 
   /* --- App windows --------------------------------------------------
      Common chrome (border, bg, shadow) comes from the existing .dw-*
@@ -459,6 +467,10 @@
     z-index: 10;
     color: var(--w98-text);
     font-family: "MS Sans Serif", Tahoma, Verdana, Arial, sans-serif;
+    /* Hard edge: nothing inside the window can bleed past its border,
+       no matter how big the inner content tries to be. Episodes' inner
+       scroll still works because its overflow:auto is on .dw-content. */
+    overflow: hidden;
     /* Phase E — open/close zoom. transform-origin set in JS to the
        originating icon's centre. Duration must match ANIM_MS in JS. */
     transform: scale(1);
@@ -524,12 +536,14 @@
     height: 420px;
   }
   /* Solitaire right-pinned, so it auto-distances from the right edge —
-     no width adjustment needed in the 880-1440 range. */
+     no width adjustment needed in the 880-1440 range. Sized to fit the
+     solitaire.webm aspect ratio (1500×700 ≈ 2.14:1) inside the content
+     area so the video fills without cropping. */
   .app-window[data-window="solitaire"] {
     right: 120px;
     bottom: 80px;
-    width: 400px;
-    height: 280px;
+    width: 520px;
+    height: 330px;
   }
 
   /* Welcome window — text-only content, no menubar/toolbar/statusbar.
@@ -562,8 +576,11 @@
     overflow-y: auto;
     padding: 10px;
   }
+  /* 4-column grid inside the Episodes window. Cards end up narrower than
+     the page-level grid so a second row peeks at the bottom of the window
+     content area, signalling "scroll for more". */
   .app-window[data-window="episodes"] .episodes-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin: 0;
     padding: 0;

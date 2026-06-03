@@ -41,8 +41,8 @@
     <!-- Bump the ?v= when desktop.js / windows.css change so browsers don't
          serve a stale cached version during local iteration. The actual
          file path is unchanged; only the URL the cache keys on changes. -->
-    <link rel="stylesheet" href="/desktop/windows.css?v=intro-1" />
-    <script defer src="/desktop/desktop.js?v=intro-1"></script>
+    <link rel="stylesheet" href="/desktop/windows.css?v=intro-4" />
+    <script defer src="/desktop/desktop.js?v=intro-4"></script>
 
     <!-- Intro choreography pre-flag. The deferred desktop.js below would
          only run AFTER first paint, leaving a frame where the logo flashes
@@ -79,18 +79,35 @@
 
       html, body { height: 100%; }
 
+      /* html intentionally keeps the system cursor — combined with the
+         .desktop inset:6px below, a 6px frame at the viewport edge shows
+         the system cursor, so the browser's window-resize cursor can take
+         over when you slide toward the Chrome tab edge. */
+      html{
+        background: var(--w98-bg);
+        cursor: auto;
+      }
+
       body{
         margin: 0;
         background: var(--w98-bg);
         color: var(--w98-text);
         font-family: "MS Sans Serif", Tahoma, Verdana, Arial, sans-serif;
-        cursor: url("/assets/cursor.png") 0 0, auto;
+        /* No cursor declaration here on purpose — body inherits `auto`
+           from html, so the frame between viewport edge and .desktop
+           (where body is the element under the mouse) shows the system
+           cursor. Browser hand-off to the window-resize cursor works
+           cleanly in that frame. */
         -webkit-font-smoothing: none;
         -moz-osx-font-smoothing: auto;
         text-rendering: geometricPrecision;
       }
 
-      *{
+      /* FAFO cursor on every interactive descendant — but NOT body itself
+         (see comment above). Specificity 0,0,0,2 beats the UA `button {
+         cursor: pointer }` rule, so the project CLAUDE.md's "no pointer
+         override" intent is preserved. */
+      body *{
         cursor: url("/assets/cursor.png") 0 0, auto;
       }
 
@@ -259,6 +276,12 @@
       <!-- Desktop icons (top-left). data-opens is read by the Phase 2 JS. -->
       <ul class="desktop-icons" aria-label="Desktop">
         <li>
+          <button class="desktop-icon" type="button" data-opens="welcome">
+            <span class="desktop-icon-glyph" data-glyph="info" aria-hidden="true"></span>
+            <span class="desktop-icon-label">Welcome</span>
+          </button>
+        </li>
+        <li>
           <button class="desktop-icon" type="button" data-opens="episodes">
             <span class="desktop-icon-glyph" data-glyph="folder" aria-hidden="true"></span>
             <span class="desktop-icon-label">Episodes</span>
@@ -272,13 +295,13 @@
         </li>
       </ul>
 
-      <!-- Welcome window: intro text, no menubar/toolbar/statusbar. -->
+      <!-- Welcome window: intro text, no menubar/toolbar/statusbar.
+           Titlebar carries only the Close control — Minimize/Maximize were
+           decorative and removed. -->
       <section class="app-window welcome-window" data-window="welcome" role="dialog" aria-label="Welcome" hidden>
         <header class="dw-titlebar" data-drag-handle>
           <span class="dw-title">Welcome</span>
           <span class="dw-titlebar-controls">
-            <button class="dw-ctrl" type="button" aria-label="Minimize"></button>
-            <button class="dw-ctrl" type="button" aria-label="Maximize"></button>
             <button class="dw-ctrl" type="button" data-close aria-label="Close"></button>
           </span>
         </header>
@@ -290,25 +313,18 @@
       </section>
 
       <!-- Solitaire window. Video paused by default until window opens
-           (Phase 2 will call .play() on open, .pause() on close). -->
+           (Phase 2 will call .play() on open, .pause() on close).
+           Toolbar removed — all buttons were decorative. -->
       <section class="app-window solitaire-window" data-window="solitaire" role="dialog" aria-label="Solitaire" hidden>
         <header class="dw-titlebar" data-drag-handle>
           <span class="dw-title">Solitaire</span>
           <span class="dw-titlebar-controls">
-            <button class="dw-ctrl" type="button" aria-label="Minimize"></button>
-            <button class="dw-ctrl" type="button" aria-label="Maximize"></button>
             <button class="dw-ctrl" type="button" data-close aria-label="Close"></button>
           </span>
         </header>
         <div class="dw-menubar">
           <span class="dw-menu-item">Game</span>
           <span class="dw-menu-item">Help</span>
-        </div>
-        <div class="dw-toolbar">
-          <span class="dw-tool-btn" title="New game">&spades;</span>
-          <span class="dw-tool-btn" title="Restart">&#x21BB;</span>
-          <span class="dw-tool-sep"></span>
-          <span class="dw-tool-btn" title="Help">?</span>
         </div>
         <div class="dw-content">
           <video class="solitaire-felt" loop muted playsinline
@@ -322,13 +338,12 @@
         </div>
       </section>
 
-      <!-- Episodes window. Cards preserved from prior layout. -->
+      <!-- Episodes window. Cards preserved from prior layout.
+           Toolbar removed — Back/Forward/Refresh/Search were decorative. -->
       <section class="app-window episodes-window" data-window="episodes" role="dialog" aria-label="Episodes" hidden>
         <header class="dw-titlebar" data-drag-handle>
           <span class="dw-title">Episodes</span>
           <span class="dw-titlebar-controls">
-            <button class="dw-ctrl" type="button" aria-label="Minimize"></button>
-            <button class="dw-ctrl" type="button" aria-label="Maximize"></button>
             <button class="dw-ctrl" type="button" data-close aria-label="Close"></button>
           </span>
         </header>
@@ -336,15 +351,35 @@
         <span class="dw-menu-item">File</span>
         <span class="dw-menu-item">View</span>
       </div>
-      <div class="dw-toolbar">
-        <span class="dw-tool-btn" title="Back">&#x25C0;</span>
-        <span class="dw-tool-btn" title="Forward">&#x25B6;</span>
-        <span class="dw-tool-sep"></span>
-        <span class="dw-tool-btn" title="Refresh">&#x21BB;</span>
-        <span class="dw-tool-btn" title="Search">?</span>
-      </div>
       <div class="dw-content">
     <div class="episodes-grid" aria-label="Episodes">
+            <article
+              class="episode-card"
+              data-episode
+              data-title="ep 007 w/ Fatema Al Khalifa, 'The Importance of Randomness'"
+              data-desc="Fatema is CEO of Unicorn Mafia, an invite-only London community of a thousand developers from the top of tech, with over thirty companies being built inside it. We opened on a Ramyeon Labs co-working day and what exactly a ramyeon machine is. PPE and behavioural economics shaped the next topic of conversation: Fatema's unconventional path into community ops. We finished on FACV, Fatema's own coinage for 'F*ck Around and Create Value', and what it means to engineer randomness without tipping into chaos."
+              data-specs="• CEO of Unicorn Mafia: invite-only London builder community (1,000+ members, ~220 waitlist)
+• Members from OpenAI, Anthropic, xAI; over 30 companies being built inside the network
+• KCL PPE + behavioural economics → research internships at UCL/MIT → community ops
+• 'Forward Deployed Unicorns': flew 35 builders to hack at the Solana building in NYC last year
+• FACV ('F*ck Around and Create Value') — engineered randomness as a community-design principle"
+              data-download="/api/episodes/ep007/download"
+            >
+              <a
+                class="episode-portrait-link"
+                href="/api/episodes/ep007/download"
+                download
+                aria-label="Download Episode 7"
+              >
+                <img
+                  class="episode-portrait"
+                  src="/assets/portraits/Fatema.png?v=1"
+                  alt="Portrait of Fatema Al Khalifa"
+                />
+              </a>
+              <div class="episode-details"></div>
+            </article>
+
             <article
               class="episode-card"
               data-episode
@@ -509,7 +544,8 @@
     </div>
       </div>
       <div class="dw-statusbar">
-        <span class="dw-status-cell">6 episode(s)</span>
+        <!-- Text is rewritten by desktop.js with the live .episode-card count. -->
+        <span class="dw-status-cell"></span>
         <span class="dw-status-grip"></span>
       </div>
       </section>
