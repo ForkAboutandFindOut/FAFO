@@ -41,8 +41,22 @@
     <!-- Bump the ?v= when desktop.js / windows.css change so browsers don't
          serve a stale cached version during local iteration. The actual
          file path is unchanged; only the URL the cache keys on changes. -->
-    <link rel="stylesheet" href="/desktop/windows.css?v=phase-f" />
-    <script defer src="/desktop/desktop.js?v=phase-f"></script>
+    <link rel="stylesheet" href="/desktop/windows.css?v=intro-1" />
+    <script defer src="/desktop/desktop.js?v=intro-1"></script>
+
+    <!-- Intro choreography pre-flag. The deferred desktop.js below would
+         only run AFTER first paint, leaving a frame where the logo flashes
+         at full opacity before fading from 0. Setting this class inline,
+         before <body> renders, lets CSS keep the logo at opacity 0 from
+         the start. desktop.js consumes sessionStorage and runs the
+         actual reveal. -->
+    <script>
+      try {
+        if (sessionStorage.getItem("fafo_just_logged_in") === "1") {
+          document.documentElement.classList.add("fafo-intro");
+        }
+      } catch (e) {}
+    </script>
 
     <style>
       @font-face{

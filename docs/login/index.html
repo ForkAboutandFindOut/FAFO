@@ -526,6 +526,11 @@
 
           setMsg("Access granted.", "ok");
           localStorage.setItem("fafo_access", "1");
+          // Signal to the homepage that this load is fresh out of the
+          // login flow → desktop.js runs the intro choreography (logo
+          // fade-in then icons + Welcome). sessionStorage survives the
+          // navigation but dies with the tab.
+          try { sessionStorage.setItem("fafo_just_logged_in", "1"); } catch (e) {}
           await runBootSequence(firstName);
           window.location.assign(next);
         } catch (err) {

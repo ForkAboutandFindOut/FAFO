@@ -164,7 +164,29 @@
   try {
     welcomeWasClosed = !!localStorage.getItem(STORAGE_KEY);
   } catch (e) {}
-  if (!welcomeWasClosed) openWindow('welcome');
+
+  // Intro choreography. The inline head script in index.html set
+  // html.fafo-intro if the visitor just came through the login flow.
+  // If so: logo fades in over 3s, then icons fade in and Welcome opens
+  // with its existing zoom animation.
+  const justLoggedIn = document.documentElement.classList.contains('fafo-intro');
+  try { sessionStorage.removeItem('fafo_just_logged_in'); } catch (e) {}
+
+  if (justLoggedIn) {
+    // Force a layout pass so the initial opacity:0 state is committed
+    // before we flip the class — otherwise the browser would batch both
+    // changes and skip the transition.
+    void document.documentElement.offsetWidth;
+    requestAnimationFrame(function () {
+      document.documentElement.classList.add('fafo-intro-logo-in');
+    });
+    setTimeout(function () {
+      document.documentElement.classList.add('fafo-intro-icons-in');
+      if (!welcomeWasClosed) openWindow('welcome');
+    }, 3000);
+  } else if (!welcomeWasClosed) {
+    openWindow('welcome');
+  }
 
   // Wire desktop icons. Pass the icon element so the open animation knows
   // where to scale-from.

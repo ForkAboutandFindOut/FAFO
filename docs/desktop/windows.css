@@ -350,7 +350,7 @@
   /* Ambient spinning FAFO logo — wallpaper element, centred behind the
      icons and windows. Transparent VP8 alpha webm. Sized via vmin so the
      logo dominates the desktop at any viewport without overflowing.
-     Opacity 0.35 keeps it visible-but-recessed; windows on top stay legible. */
+     Full opacity — the logo is the hero of the desktop. */
   .ambient-logo {
     position: absolute;
     top: 50%;
@@ -361,7 +361,27 @@
     display: block;
     z-index: 1;
     pointer-events: none;
-    opacity: 0.55;
+    opacity: 1;
+  }
+
+  /* --- Intro choreography (first arrival after login) ------------------
+     Inline head script in index.html adds .fafo-intro to <html> when
+     sessionStorage.fafo_just_logged_in is set, BEFORE first paint, so
+     the logo and icons start at opacity 0 without flashing. desktop.js
+     then adds the *-in classes to trigger the transitions. ----------- */
+  html.fafo-intro .ambient-logo {
+    opacity: 0;
+    transition: opacity 3s ease-out;
+  }
+  html.fafo-intro.fafo-intro-logo-in .ambient-logo {
+    opacity: 1;
+  }
+  html.fafo-intro .desktop-icons {
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+  }
+  html.fafo-intro.fafo-intro-icons-in .desktop-icons {
+    opacity: 1;
   }
 
   /* Vertical icon strip in the top-left, Win98 style. */
