@@ -38,8 +38,11 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Fork About and Find Out</title>
 
-    <link rel="stylesheet" href="/desktop/windows.css" />
-    <script defer src="/desktop/desktop.js"></script>
+    <!-- Bump the ?v= when desktop.js / windows.css change so browsers don't
+         serve a stale cached version during local iteration. The actual
+         file path is unchanged; only the URL the cache keys on changes. -->
+    <link rel="stylesheet" href="/desktop/windows.css?v=phase-f" />
+    <script defer src="/desktop/desktop.js?v=phase-f"></script>
 
     <style>
       @font-face{
