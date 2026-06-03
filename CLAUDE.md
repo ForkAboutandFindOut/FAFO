@@ -55,7 +55,7 @@ Path to the "Aesthetic direction" desktop-sim goal:
 - **Intro copy as Win98 system text.** Done. Lived briefly in the hero window; now lives inside the Welcome window in the desktop sim.
 - **E.1 — Hero/Episodes/Solitaire fixed-position layout.** Superseded by the full desktop sim — the `.hero-wrap` markup and always-visible windows are gone.
 - **E.2 — Real Solitaire video.** Done. `docs/assets/solitaire.webm` (25s VP9 loop, 805 KiB), displayed inside the Solitaire app-window.
-- **Desktop sim Phases A–F.** Done on the `desktop-sim` branch (not yet merged to main). Skeleton + open/close + Welcome auto-open + drag + focus/z-index + open-close zoom animations + mobile + squeeze-resilient layout. See "Desktop windowed sim".
+- **Desktop sim Phases A–F.** Done and live. Skeleton + open/close + Welcome auto-open + drag + focus/z-index + open-close zoom animations + mobile + squeeze-resilient layout. See "Desktop windowed sim".
 - **Playable Solitaire game** (deferred). User explored; verdict was to vendor an MIT-licensed JS Klondike clone (~30–50 KB) into the Solitaire window, keeping the video as the idle-state aesthetic. Hold until after the desktop sim ships.
 - **MS Paint window** (deferred, was Phase E original-scope). Wraps `/assets/fafo-logo.png` in Paint chrome with a fake toolbar/palette.
 
@@ -73,7 +73,7 @@ Plays once between login-submit success and the homepage redirect. ~3.5s total. 
 
 ## Desktop windowed sim
 
-Lives on the `desktop-sim` branch. Files: `docs/index.html` (markup), `docs/desktop/windows.css` (style), `docs/desktop/desktop.js` (window manager, ~150 lines, vanilla, no deps).
+Files: `docs/index.html` (markup), `docs/desktop/windows.css` (style), `docs/desktop/desktop.js` (window manager, ~150 lines, vanilla, no deps).
 
 **Structure.** `<main class="desktop">` contains: ambient spinning logo (`<video class="ambient-logo">`, transparent VP8-alpha webm, 80vmin, opacity 0.35); icon strip top-left (`<ul class="desktop-icons">`, currently Episodes + Solitaire); three `<section class="app-window" data-window="…" hidden>` (Welcome, Solitaire, Episodes). Icons unhide the corresponding window on click. Welcome auto-opens on first visit.
 
