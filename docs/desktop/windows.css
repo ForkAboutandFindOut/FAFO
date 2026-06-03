@@ -267,120 +267,223 @@
 }
 
 
-/* --- Mobile (≤879px): hide the desktop sim entirely ---------------- */
+/* ------------------------------------------------------------------
+   Phase F — stylised desktop sim.
 
+   The page becomes a Win98 desktop: ambient spinning logo centred as a
+   "wallpaper" element, icons in the top-left, and three app windows
+   (.app-window) that the user opens by clicking icons. In Phase 1 all
+   three windows are visible by default at preset positions so the
+   layout can be reviewed; Phase 2 hides them and wires click-to-open.
+   ------------------------------------------------------------------ */
+
+/* --- Mobile (<880px): scroll-stack, no desktop sim ----------------- */
 @media (max-width: 879.98px) {
-  .solitaire-window {
-    display: none;
-  }
-
-  /* display:contents = the wrapper vanishes from layout; children
-     (.episodes-grid) flow as if the wrapper weren't there. This is
-     how the mobile path remains identical to today. */
-  .episodes-window {
+  /* The desktop wrapper vanishes from layout so its children flow
+     normally. Icons + ambient logo are hidden; Solitaire window is
+     hidden; Welcome and Episodes flatten into the document flow. */
+  .desktop {
     display: contents;
   }
-  .episodes-window .dw-titlebar,
-  .episodes-window .dw-menubar {
+  .desktop-icons,
+  .ambient-logo,
+  .app-window[data-window="solitaire"] {
+    display: none;
+  }
+  .app-window {
+    position: static;
+    margin: 16px;
+    box-shadow: 2px 2px 0 #000;
+  }
+  .app-window[data-window="episodes"] {
+    display: contents;
+  }
+  .app-window[data-window="episodes"] .dw-titlebar,
+  .app-window[data-window="episodes"] .dw-menubar,
+  .app-window[data-window="episodes"] .dw-toolbar,
+  .app-window[data-window="episodes"] .dw-statusbar {
     display: none;
   }
 }
 
-
 /* --- Desktop (≥880px): the windowed layout ------------------------- */
-
 @media (min-width: 880px) {
-
-  /* Make the document itself taller so the page has a vertical scroll.
-     Bumped to 140vh to make room for the taller Episodes window below. */
-  body {
-    height: auto;
-    min-height: 140vh;
+  /* Desktop fills the viewport; no page-level scrolling. App windows
+     handle their own internal scrolling via .dw-content overflow. */
+  html, body {
+    height: 100%;
+    overflow: hidden;
   }
 
-  /* Hero. Width: 60% of 760 (= 456) then ×1.10 ×1.15 = 577px.
-     position:absolute so it scrolls with the page; the three windows
-     keep fixed positions *relative to each other*. */
-  .hero-wrap {
-    position: absolute;
-    top: 24px;
-    left: 0;
-    right: 0;
-    z-index: 2;
-    padding: 0 16px;
-  }
-  /* clamp(min, preferred, max) lets the hero scale with viewport between
-     a floor and ceiling. 40vw hits ~577px at 1440 viewport (your full-
-     screen tuning), shrinks gracefully on narrow windows (down to 420),
-     and stops at 700 so it doesn't dominate ultra-wide screens. */
-  .hero-wrap .hero-window {
-    width: clamp(420px, 40vw, 700px);
-  }
-  /* No aspect-ratio override: use the video's intrinsic 16:9 so the
-     border wraps snugly with no letterbox dead-space. (Earlier this was
-     forced 2.05/1 for a wider look; user reverted in 2026-05.) */
-  .hero-wrap .hero-spin {
-    height: auto;
-  }
-
-  /* Solitaire — large background window. Width 72vw, shifted right
-     (left:28vw flush with viewport's right edge). Pushed down so the
-     hero sits mostly above Solitaire's body; top-left corner pokes out
-     in the upper-left region, visible above Episodes and left of Hero. */
-  .solitaire-window {
-    position: absolute;
-    left: calc(25vw - 20px);   /* 25vw base, shifted 20px further left */
-    width: 72vw;
-    top: 37vh;
-    height: 62vh;              /* was top:37vh + bottom:1vh; switched to
-                                  explicit height so absolute positioning
-                                  doesn't get pinned to the (taller) body
-                                  via the bottom anchor. */
+  .desktop {
+    position: fixed;
+    inset: 0;
     z-index: 0;
+  }
+
+  /* Ambient spinning FAFO logo — wallpaper element, centred behind the
+     icons and windows. Transparent VP8 alpha webm. Sized via vmin so the
+     logo dominates the desktop at any viewport without overflowing.
+     Opacity 0.35 keeps it visible-but-recessed; windows on top stay legible. */
+  .ambient-logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80vmin;
+    height: auto;
+    display: block;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.55;
+  }
+
+  /* Vertical icon strip in the top-left, Win98 style. */
+  .desktop-icons {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
     display: flex;
     flex-direction: column;
+    gap: 14px;
+    z-index: 2;
   }
-  .solitaire-window .dw-content {
+
+  .desktop-icon {
+    background: none;
+    border: 0;
+    color: #fff;
+    font-family: inherit;
+    font-size: 11px;
+    padding: 4px;
+    width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: inherit;
+    text-align: center;
+    /* 1px black outline so the white label reads on any background. */
+    text-shadow:
+      -1px -1px 0 #000,
+       1px -1px 0 #000,
+      -1px  1px 0 #000,
+       1px  1px 0 #000;
+    user-select: none;
+  }
+
+  /* Click target gets a dotted focus rectangle on keyboard nav, à la
+     Win98 selected-icon state. */
+  .desktop-icon:focus-visible {
+    outline: 1px dotted #fff;
+    outline-offset: 2px;
+  }
+
+  .desktop-icon-glyph {
+    width: 44px;
+    height: 44px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+  }
+  .desktop-icon-glyph[data-glyph="folder"] {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" shape-rendering="crispEdges"><path d="M3 14 L13 14 L15 11 L24 11 L24 14 L41 14 L41 36 L3 36 Z" fill="%23e8c44a" stroke="black" stroke-width="1.5"/><line x1="3" y1="18" x2="41" y2="18" stroke="black" stroke-width="0.6"/></svg>');
+  }
+  .desktop-icon-glyph[data-glyph="cards"] {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" shape-rendering="crispEdges"><rect x="6" y="10" width="22" height="28" fill="white" stroke="black" stroke-width="1.5" transform="rotate(-10 17 24)"/><rect x="14" y="8" width="22" height="28" fill="white" stroke="black" stroke-width="1.5"/><text x="25" y="29" font-family="serif" font-size="20" font-weight="bold" text-anchor="middle" fill="black">%E2%99%A0</text></svg>');
+  }
+
+  /* --- App windows --------------------------------------------------
+     Common chrome (border, bg, shadow) comes from the existing .dw-*
+     rules above; .app-window adds positioning + the layered raised
+     bevel. position:absolute so the desktop wrapper anchors them. */
+  .app-window {
+    position: absolute;
+    background: var(--w98-face);
+    border: 2px solid var(--w98-hilite);
+    box-shadow:
+      inset -2px -2px 0 var(--w98-shadow),
+      inset  2px  2px 0 var(--w98-hilite),
+      2px 2px 0 #000;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    color: var(--w98-text);
+    font-family: "MS Sans Serif", Tahoma, Verdana, Arial, sans-serif;
+  }
+  /* Re-assert the UA default — without this, the .app-window's explicit
+     display:flex wins over [hidden]'s display:none. */
+  .app-window[hidden] {
+    display: none;
+  }
+
+  /* Phase 1 preset positions. Phase 2 JS will own these and reset on
+     open. Welcome top-right of centre, Episodes left-of-centre, Solitaire
+     bottom-right. */
+  .app-window[data-window="welcome"] {
+    top: 70px;
+    right: 80px;
+    width: 360px;
+  }
+  .app-window[data-window="episodes"] {
+    left: 140px;
+    top: 200px;
+    width: 720px;
+    height: 420px;
+  }
+  .app-window[data-window="solitaire"] {
+    right: 120px;
+    bottom: 80px;
+    width: 400px;
+    height: 280px;
+  }
+
+  /* Welcome window — text-only content, no menubar/toolbar/statusbar.
+     dw-content overrides the sunken inner panel for a cleaner reading
+     surface (just window face, no recessed border). */
+  .app-window[data-window="welcome"] .dw-content {
+    padding: 14px 18px;
+    background: var(--w98-face);
+    border: 0;
+    margin: 0;
+  }
+  .app-window[data-window="welcome"] .intro {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+    margin: 0 0 10px;
+    text-align: left;
+  }
+  .app-window[data-window="welcome"] .intro:last-child {
+    margin-bottom: 0;
+  }
+  /* Title icon: little speech-bubble "i" for "info / readme". */
+  .app-window[data-window="welcome"] .dw-title::before {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="white" stroke="black" stroke-width="1"/><text x="7" y="11" font-family="serif" font-size="11" font-weight="bold" text-anchor="middle" fill="black">i</text></svg>');
+  }
+
+  /* Episodes content — internal scroll, three-column card grid. */
+  .app-window[data-window="episodes"] .dw-content {
     flex: 1;
-    /* min-height:0 lets the flex column shrink below the video's intrinsic
-       height; without it, the 1500x700 video forces dw-content past the
-       window's 62vh, pushing the statusbar (and its bottom-right grip)
-       outside the window's bottom border. overflow:hidden clips the
-       cover-fit video cleanly inside the recessed content panel. */
+    overflow-y: auto;
+    padding: 10px;
+  }
+  .app-window[data-window="episodes"] .episodes-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Solitaire content — video fills via object-fit:cover (same as before). */
+  .app-window[data-window="solitaire"] .dw-content {
+    flex: 1;
     min-height: 0;
     overflow: hidden;
     padding: 4px;
     display: flex;
-  }
-
-  /* Episodes — absolute, top:50vh, height 58vh. Bottom sits 85px below
-     Solitaire's bottom (so the box physically overhangs Solitaire). At
-     scroll 0 the overhang is mostly clipped by viewport bottom; scroll
-     the page down to bring it into view. Cards inside still scroll
-     internally via .dw-content's overflow-y:auto. */
-  .episodes-window {
-    position: absolute;
-    left: 16px;
-    /* max(60vh, 580px): 60vh keeps the original tall-viewport spacing;
-       the 580px floor prevents the hero from overlapping episodes at
-       common heights (≤~960px), where 60vh isn't enough to clear the
-       16:9 hero + intro text. */
-    top: max(60vh, 580px);
-    width: clamp(468px, 52vw, 910px);   /* +30% on every clamp value */
-    height: 75vh;                       /* +29% from prior 58vh */
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  .episodes-window .dw-content {
-    flex: 1;
-    overflow-y: auto;          /* internal scroll when episodes overflow */
-    padding: 10px;
-  }
-
-  /* Three-column picture-card grid inside the Episodes window. */
-  .episodes-window .episodes-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
   }
 }

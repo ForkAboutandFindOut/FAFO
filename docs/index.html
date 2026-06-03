@@ -39,6 +39,7 @@
     <title>Fork About and Find Out</title>
 
     <link rel="stylesheet" href="/desktop/windows.css" />
+    <script defer src="/desktop/desktop.js"></script>
 
     <style>
       @font-face{
@@ -76,39 +77,15 @@
         cursor: url("/assets/cursor.png") 0 0, auto;
       }
 
-      .hero-wrap{
-        display: flex;
-        justify-content: center;
-        padding: 24px 16px 0;
+      /* Mobile-fallback intro styling. Desktop overrides this inside the
+         Welcome window via windows.css (smaller font, left-aligned). */
+      .intro{
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.45;
+        margin: 12px 0;
+        color: var(--w98-text);
       }
-
-      .hero-window{
-        width: min(760px, 100%);
-      }
-
-      .hero-content{
-        padding: 12px;
-      }
-
-      .hero-spin{
-        width: 100%;
-        height: auto;
-        display: block;
-        background: var(--w98-face);
-        border: 2px solid var(--w98-hilite);
-        box-shadow:
-          inset -2px -2px 0 var(--w98-shadow),
-          inset  2px  2px 0 var(--w98-hilite);
-      }
-
-    .intro{
-          font-size: 17px;
-          font-weight: 600;
-          line-height: 1.4;
-          margin: 12px 0 0;
-          color: var(--w98-text);
-          text-align: center;
-        }
 
     /* Black outline on the fork emoji so it reads against the grey
        window face on systems where emoji render as flat/dark glyphs. */
@@ -130,84 +107,6 @@
     .ep-title{
       font-weight: 800;
     }
-      
-      .wrap{
-        min-height: 100%;
-        display: grid;
-        place-items: center;
-        padding: 40px 16px;
-      }
-
-      /* Window */
-      .window{
-        width: min(760px, 100%);
-        background: var(--w98-face);
-        border: 2px solid var(--w98-hilite);
-        box-shadow:
-          inset -2px -2px 0 var(--w98-shadow),
-          inset  2px  2px 0 var(--w98-hilite),
-          2px 2px 0 #000;
-        background-image: linear-gradient(rgba(0,0,0,0.02), rgba(0,0,0,0.02));
-      }
-
-      /* Titlebar */
-      .titlebar{
-        background: var(--w98-title);
-        color: var(--w98-title-text);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 6px 8px;
-        font-weight: 700;
-        user-select: none;
-      }
-
-      .titlebar .title{
-        font-size: 13px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .titlebar-controls{
-        display: flex;
-        gap: 6px;
-      }
-
-      .ctrl{
-        width: 18px;
-        height: 18px;
-        background: var(--w98-face);
-        border: 2px solid var(--w98-hilite);
-        box-shadow:
-          inset -2px -2px 0 var(--w98-shadow),
-          inset  2px  2px 0 var(--w98-hilite);
-      }
-
-      /* Content */
-      .content{
-        padding: 18px 18px 20px;
-      }
-
-      h1{
-        margin: 0 0 8px;
-        font-size: 28px;
-        font-weight: 700;
-        line-height: 1.1;
-      }
-
-      .sub{
-        margin: 8px 0 0;
-        font-size: 13px;
-        line-height: 1.35;
-        text-align: center;
-        color: var(--w98-text);
-      }
-
-      /* Responsive */
-      @media (max-width: 560px){
-        h1{ font-size: 24px; }
-      }
 
       .episodes-grid{
         display: grid;
@@ -327,81 +226,95 @@
 
   <body>
 
-    <!-- Phase E.1: ambient background "Solitaire" window (desktop only) -->
-    <aside class="desktop-window solitaire-window" aria-hidden="true">
-      <div class="dw-titlebar">
-        <div class="dw-title">Solitaire</div>
-        <div class="dw-titlebar-controls">
-          <div class="dw-ctrl"></div>
-          <div class="dw-ctrl"></div>
-          <div class="dw-ctrl"></div>
-        </div>
-      </div>
-      <div class="dw-menubar">
-        <span class="dw-menu-item">Game</span>
-        <span class="dw-menu-item">Help</span>
-      </div>
-      <div class="dw-toolbar">
-        <span class="dw-tool-btn" title="New game">&spades;</span>
-        <span class="dw-tool-btn" title="Restart">&#x21BB;</span>
-        <span class="dw-tool-sep"></span>
-        <span class="dw-tool-btn" title="Help">?</span>
-      </div>
-      <div class="dw-content">
-        <video class="solitaire-felt" autoplay loop muted playsinline
-               preload="auto" poster="/assets/solitaire-poster.jpg">
-          <source src="/assets/solitaire.webm" type="video/webm">
-        </video>
-      </div>
-      <div class="dw-statusbar">
-        <span class="dw-status-cell">Game in progress</span>
-        <span class="dw-status-grip"></span>
-      </div>
-    </aside>
+    <!-- Phase F: desktop sim. The whole page is a Win98 desktop with an
+         ambient spinning logo, two icons, and app windows the user opens.
+         Phase 1 has all windows visible by default for layout review;
+         Phase 2 hides them and wires click-to-open. -->
+    <main class="desktop">
 
-    <header class="hero-wrap">
-      <div class="window hero-window" role="region" aria-label="FAFO Logo">
-        <div class="titlebar">
-          <div class="title">Fork About and Find Out</div>
-          <div class="titlebar-controls" aria-hidden="true">
-            <div class="ctrl" title="Minimize"></div>
-            <div class="ctrl" title="Maximize"></div>
-            <div class="ctrl" title="Close"></div>
-          </div>
+      <!-- Wallpaper element: spinning logo (transparent bg), centred, non-interactive.
+           VP8 alpha webm — re-encoded from the ProRes 4444 master so the
+           Win98 desktop teal shows through where the logo isn't. -->
+      <video class="ambient-logo" autoplay loop muted playsinline preload="metadata" aria-hidden="true">
+        <source src="/assets/fafo-spin-transparent.webm" type="video/webm" />
+      </video>
+
+      <!-- Desktop icons (top-left). data-opens is read by the Phase 2 JS. -->
+      <ul class="desktop-icons" aria-label="Desktop">
+        <li>
+          <button class="desktop-icon" type="button" data-opens="episodes">
+            <span class="desktop-icon-glyph" data-glyph="folder" aria-hidden="true"></span>
+            <span class="desktop-icon-label">Episodes</span>
+          </button>
+        </li>
+        <li>
+          <button class="desktop-icon" type="button" data-opens="solitaire">
+            <span class="desktop-icon-glyph" data-glyph="cards" aria-hidden="true"></span>
+            <span class="desktop-icon-label">Solitaire</span>
+          </button>
+        </li>
+      </ul>
+
+      <!-- Welcome window: intro text, no menubar/toolbar/statusbar. -->
+      <section class="app-window welcome-window" data-window="welcome" role="dialog" aria-label="Welcome" hidden>
+        <header class="dw-titlebar" data-drag-handle>
+          <span class="dw-title">Welcome</span>
+          <span class="dw-titlebar-controls">
+            <button class="dw-ctrl" type="button" aria-label="Minimize"></button>
+            <button class="dw-ctrl" type="button" aria-label="Maximize"></button>
+            <button class="dw-ctrl" type="button" data-close aria-label="Close"></button>
+          </span>
+        </header>
+        <div class="dw-content">
+          <p class="intro">Welcome to Fork About and Find Out.</p>
+          <p class="intro">Forking means taking a piece of code and duplicating it, allowing one to experiment and 'fork about' freely. This project is an interview series with the 'forkers' of this world (roughly) within tech and entrepreneurship.</p>
+          <p class="intro">The rules end there, explore the site and hover over the episodes to discover more. <span class="fork-icon">🍴</span></p>
         </div>
-        <div class="hero-content">
-          <video
-            class="hero-spin"
-            autoplay
-            loop
-            muted
-            playsinline
-            preload="metadata"
-          >
-            <source src="/assets/fafo-homepage.webm" type="video/webm" />
+      </section>
+
+      <!-- Solitaire window. Video paused by default until window opens
+           (Phase 2 will call .play() on open, .pause() on close). -->
+      <section class="app-window solitaire-window" data-window="solitaire" role="dialog" aria-label="Solitaire" hidden>
+        <header class="dw-titlebar" data-drag-handle>
+          <span class="dw-title">Solitaire</span>
+          <span class="dw-titlebar-controls">
+            <button class="dw-ctrl" type="button" aria-label="Minimize"></button>
+            <button class="dw-ctrl" type="button" aria-label="Maximize"></button>
+            <button class="dw-ctrl" type="button" data-close aria-label="Close"></button>
+          </span>
+        </header>
+        <div class="dw-menubar">
+          <span class="dw-menu-item">Game</span>
+          <span class="dw-menu-item">Help</span>
+        </div>
+        <div class="dw-toolbar">
+          <span class="dw-tool-btn" title="New game">&spades;</span>
+          <span class="dw-tool-btn" title="Restart">&#x21BB;</span>
+          <span class="dw-tool-sep"></span>
+          <span class="dw-tool-btn" title="Help">?</span>
+        </div>
+        <div class="dw-content">
+          <video class="solitaire-felt" loop muted playsinline
+                 preload="metadata" poster="/assets/solitaire-poster.jpg">
+            <source src="/assets/solitaire.webm" type="video/webm">
           </video>
-          <p class="intro">
-            Welcome to Fork About and Find Out where we do... exactly that. I'm running a series of interviews with people working (roughly) within tech and entrepreneurship.
-          </p>
-          <p class="intro">
-            The rules end there. Browse this site to find out more <span class="fork-icon">🍴</span>
-          </p>
         </div>
-      </div>
-    </header>
+        <div class="dw-statusbar">
+          <span class="dw-status-cell">Game in progress</span>
+          <span class="dw-status-grip"></span>
+        </div>
+      </section>
 
-    <!-- Phase E.1: episodes wrapped in Win98 window chrome on desktop.
-         At <880px the .episodes-window collapses to display:contents so
-         the .episodes-grid renders identically to today. -->
-    <section class="desktop-window episodes-window" aria-label="Episodes window">
-      <div class="dw-titlebar">
-        <div class="dw-title">Episodes</div>
-        <div class="dw-titlebar-controls">
-          <div class="dw-ctrl"></div>
-          <div class="dw-ctrl"></div>
-          <div class="dw-ctrl"></div>
-        </div>
-      </div>
+      <!-- Episodes window. Cards preserved from prior layout. -->
+      <section class="app-window episodes-window" data-window="episodes" role="dialog" aria-label="Episodes" hidden>
+        <header class="dw-titlebar" data-drag-handle>
+          <span class="dw-title">Episodes</span>
+          <span class="dw-titlebar-controls">
+            <button class="dw-ctrl" type="button" aria-label="Minimize"></button>
+            <button class="dw-ctrl" type="button" aria-label="Maximize"></button>
+            <button class="dw-ctrl" type="button" data-close aria-label="Close"></button>
+          </span>
+        </header>
       <div class="dw-menubar">
         <span class="dw-menu-item">File</span>
         <span class="dw-menu-item">View</span>
@@ -582,7 +495,9 @@
         <span class="dw-status-cell">6 episode(s)</span>
         <span class="dw-status-grip"></span>
       </div>
-    </section>
+      </section>
+
+    </main>
 
     <div class="episode-tooltip" id="episodeTooltip" aria-hidden="true">
       <div class="episode-tooltip-title" id="episodeTooltipTitle"></div>
