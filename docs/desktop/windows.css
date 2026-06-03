@@ -314,14 +314,16 @@
   .app-window[data-window="welcome"] .dw-titlebar {
     display: none;
   }
-  /* Strip the window-chrome look from the content box so the intro
-     paragraphs appear as plain text on the teal desktop (matching the
-     pre-redesign mobile look). */
+  /* Win98 content panel for the intro on mobile: grey face + black border
+     + 2px drop shadow. Matches the visual language of the episode portrait
+     boxes below so the intro reads as an intentional widget on the teal
+     desktop rather than floating prose. */
   .app-window[data-window="welcome"] .dw-content {
-    background: transparent;
-    border: 0;
+    background: var(--w98-face);
+    border: 2px solid #000;
+    box-shadow: 2px 2px 0 #000;
     margin: 16px;
-    padding: 0;
+    padding: 14px 18px;
   }
   /* Centre the intro on mobile, like the old .hero copy. */
   .app-window[data-window="welcome"] .intro {
@@ -407,9 +409,9 @@
     border: 0;
     color: #fff;
     font-family: inherit;
-    font-size: 11px;
-    padding: 4px;
-    width: 80px;
+    font-size: 13px;
+    padding: 6px;
+    width: 104px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -433,8 +435,8 @@
   }
 
   .desktop-icon-glyph {
-    width: 44px;
-    height: 44px;
+    width: 60px;
+    height: 60px;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
@@ -532,8 +534,9 @@
   .app-window[data-window="episodes"] {
     left: clamp(40px, 10vw, 140px);
     top: 200px;
-    width: clamp(420px, 80vw, 720px);
-    height: 420px;
+    /* +20% from previous 420/720 width range and 420 height. */
+    width: clamp(504px, 80vw, 864px);
+    height: 504px;
   }
   /* Solitaire right-pinned, so it auto-distances from the right edge —
      no width adjustment needed in the 880-1440 range. Sized to fit the
