@@ -61,21 +61,23 @@ SUBJECT = "'The Importance of Randomness' — ep 7 of Fork About and Find Out"
 BODY_TEXT = """\
 Hi {first_name},
 
-You're getting this because you signed up at forkaboutandfindout.co.uk at some point in the last few months. This is the first time I'm actually writing — no schedule yet, just one email when a new episode goes out. If that's more than you wanted, the unsubscribe link is at the bottom.
+My name is Sasha and at some point in the last few months you opted into the FAFO mailing list. It's been a minute, but this is the first time I'm actually writing! For now, I'll be sending an email every time a new episode comes out. Opt-out link is at the bottom if that's too much :)
 
-Episode 7 is out: 'The Importance of Randomness' with Fatema Al Khalifa.
+More importantly, Episode 7 is out: 'The Importance of Randomness' with Fatema Al Khalifa.
 
-Fatema is CEO of Unicorn Mafia, an invite-only London community of a thousand of the city's most talented developers — Anthropic, OpenAI, xAI, Imperial. Over thirty companies being built inside it. She's the person deciding who gets in.
+Fatema is the CEO of Unicorn Mafia, an invite-only, London based community of a thousand of the city's most talented developers. Think Anthropic, OpenAI, xAI, Imperial... you get the picture. She's the person deciding who gets in, so this was a pretty cool interview.
 
-We talked about a philosophy she calls FACV — 'F*ck Around and Create Value' — built on the idea that randomness between cracked builders creates disproportionate value. Where it came from, what it actually means to engineer randomness without it tipping into chaos.
+One of the key topics we discussed was a philosophy she calls FACV: 'F*ck Around and Create Value' (close enough to our very own FAFO). It's built on the idea that randomness between very talented people creates disproportionate value.
 
-Listen here: {public_url}/
+To listen to the full interview:
 
-Thanks for being here,
+{public_url}/
+
+Lots of love,
+
 Sasha
 
----
-Unsubscribe: {unsubscribe_url}
+P.S. If you'd rather not get these, you can unsubscribe here: {unsubscribe_url}
 """
 
 
@@ -136,6 +138,7 @@ def fetch_recipients(supabase_url: str, service_key: str) -> list[dict]:
             "apikey": service_key,
             "authorization": f"Bearer {service_key}",
             "accept": "application/json",
+            "user-agent": "FAFO-newsletter/1.0 (+https://forkaboutandfindout.co.uk)",
         },
     )
     with urllib.request.urlopen(req, timeout=15) as r:
@@ -177,6 +180,10 @@ def resend_send_one(
         headers={
             "authorization": f"Bearer {api_key}",
             "content-type": "application/json",
+            # Resend sits behind Cloudflare; the default urllib UA
+            # ("Python-urllib/3.x") trips Cloudflare's WAF (error 1010).
+            # A descriptive UA identifies the script and passes the check.
+            "user-agent": "FAFO-newsletter/1.0 (+https://forkaboutandfindout.co.uk)",
         },
         method="POST",
     )
