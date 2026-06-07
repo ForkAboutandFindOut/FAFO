@@ -4,17 +4,19 @@ Interview series in tech / AI / company creation. Live site: https://forkaboutan
 
 ## What I'll usually ask for help with
 
-- Adding new episodes (`episodes.yml`, `docs/`, portraits, RSS).
+- Adding new episodes (`episodes.yml`, `docs/`, portraits, RSS, R2 upload, newsletter send).
 - Frontend tweaks (HTML/CSS in `docs/`, mobile behavior, visuals).
+- Newsletter sends from `tools/send_newsletter.py` (see Newsletter pipeline below).
 
 ## Layout
 
 - `docs/` — static site (custom domain + GitHub Pages style). Entry is `docs/index.html`; the inline script at the top calls `/api/gate` and redirects to `/login/` if the visitor isn't allowed in.
 - `docs/desktop/windows.css` + `docs/desktop/desktop.js` — desktop windowed sim (Win98-style desktop with icons + draggable, focusable, scale-animated windows). Both linked from `index.html`. See "Desktop windowed sim" below.
-- `functions/` — Cloudflare Pages Functions (TypeScript). API routes: `gate`, `send-otp`, `subscribe`, `episodes/`. Auth callback at `auth/callback.ts`. Site-wide `_middleware.ts`.
+- `functions/` — Cloudflare Pages Functions (TypeScript). API routes: `gate`, `send-otp`, `subscribe`, `unsubscribe`, `episodes/`. Auth callback at `auth/callback.ts`. Site-wide `_middleware.ts`.
 - `episodes.yml` — source of truth for the podcast feed.
 - `tools/generate_feed.py` — generates `docs/feed.xml` from `episodes.yml`.
 - `tools/transcribe.py` — transcribes a guest MP3 via AssemblyAI (see Transcription section).
+- `tools/send_newsletter.py` — sends a per-episode newsletter via Resend (see Newsletter pipeline below).
 - `package.json` — only dep is `@supabase/ssr` (used by the functions).
 
 ## Auth gate — how it actually works
@@ -29,7 +31,7 @@ So the gate is mailing-list capture, not authentication — anyone can type any 
 
 **Dead code:** `functions/api/send-otp.ts` and `functions/auth/callback.ts` aren't reached by the live login form. Either old or future. Don't delete without asking.
 
-**Env vars (Cloudflare Pages dashboard):** `GATE_COOKIE_SECRET` (signs cookies — critical), `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (used by `/api/subscribe` — full DB admin).
+**Env vars (Cloudflare Pages dashboard):** `GATE_COOKIE_SECRET` (signs cookies — critical), `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (used by `/api/subscribe` — full DB admin), `UNSUBSCRIBE_SECRET` (HMAC for `/api/unsubscribe` tokens — deliberately separate from `GATE_COOKIE_SECRET` so the two trust domains don't overlap), `RESEND_API_KEY` (newsletter sends).
 
 **Supabase free-tier auto-pause:** the project pauses after ~1 week of inactivity. Symptom: `POST /api/subscribe` returns Cloudflare's plain-text `502` (not the function's JSON), so the login form shows the generic "Something went wrong." fallback. Fix: Supabase dashboard → Restore project, wait ~1 min, retry. `subscribe.ts` wraps its body in a top-level try/catch so other runtime errors return a real JSON `{ok:false, error, details}` instead of falling through to Cloudflare's 502 — but a paused project still won't accept writes. Prevention: `.github/workflows/keepalive-supabase.yml` pings the REST API every 3 days (needs `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` set as GitHub Actions secrets).
 
@@ -71,27 +73,40 @@ Plays once between login-submit success and the homepage redirect. ~3.5s total. 
 
 **Preview-tool caveat:** Claude Preview / headless Chrome heavily throttles `requestAnimationFrame` when the tab isn't focused, making the sequence appear 5–10× slower than reality. Trust the math (sum of `text.length/cps + gapAfter`), not preview wall-clock timings. The DOM state after the Promise resolves is reliable; per-frame timing isn't.
 
+**Hand-off to homepage intro.** The login form sets `sessionStorage.fafo_just_logged_in = "1"` right before `window.location.assign(next)` fires. The homepage reads + consumes that flag to trigger its own post-login intro choreography — see "Post-login intro choreography" below.
+
+## Post-login intro choreography
+
+Plays on the homepage, *after* the boot sequence, on the visitor's first arrival post-login. ~3.5s total. Returning visitors skip it entirely (their `sessionStorage` flag isn't set).
+
+- Pre-flag: inline `<script>` in `docs/index.html` `<head>` reads `sessionStorage.fafo_just_logged_in` and adds `html.fafo-intro` **before first paint**. Pattern is *FOUC prevention* — without this, the deferred `desktop.js` would only run after the first paint, so the logo would flash at full opacity before snapping to 0 and fading in.
+- `windows.css` rules under `html.fafo-intro` set `.ambient-logo` and `.desktop-icons` to `opacity: 0` with `transition: opacity 3s` and `0.4s` respectively. `.fafo-intro-logo-in` / `.fafo-intro-icons-in` flip them to `opacity: 1`.
+- `desktop.js` orchestrates: read + clear the sessionStorage flag → `requestAnimationFrame` → add `fafo-intro-logo-in` (3s CSS fade kicks in) → `setTimeout(3000)` → add `fafo-intro-icons-in` AND call `openWindow('welcome')` (unless previously closed).
+
 ## Desktop windowed sim
 
 Files: `docs/index.html` (markup), `docs/desktop/windows.css` (style), `docs/desktop/desktop.js` (window manager, ~150 lines, vanilla, no deps).
 
-**Structure.** `<main class="desktop">` contains: ambient spinning logo (`<video class="ambient-logo">`, transparent VP8-alpha webm, 80vmin, opacity 0.35); icon strip top-left (`<ul class="desktop-icons">`, currently Episodes + Solitaire); three `<section class="app-window" data-window="…" hidden>` (Welcome, Solitaire, Episodes). Icons unhide the corresponding window on click. Welcome auto-opens on first visit.
+**Structure.** `<main class="desktop">` contains: ambient spinning logo (`<video class="ambient-logo">`, transparent VP8-alpha webm, 80vmin, opacity 1 — was 0.35, bumped for hero presence); icon strip top-left (`<ul class="desktop-icons">`, three icons: Welcome / Episodes / Solitaire); three `<section class="app-window" data-window="…" hidden>` (Welcome, Solitaire, Episodes). Icons unhide the corresponding window on click. Welcome auto-opens on first visit *unless* the intro choreography is running, in which case it opens after the 3s logo fade.
+
+**Browser-edge resize buffer.** `.desktop { inset: 16px }` exposes a 16px frame of teal `<html>` background at the viewport edge. The cursor declarations are scoped to `body *` (not `*`), so `html` keeps the system cursor — and the browser's window-resize cursor can take over cleanly when you slide toward the Chrome tab edge. The teal-on-teal frame is visually invisible.
 
 **Window chrome classes**: `.dw-titlebar` / `.dw-menubar` / `.dw-toolbar` / `.dw-content` / `.dw-statusbar` / `.dw-ctrl`. Same system as the prior E.1.
 
 **JS behaviour (`desktop.js`):**
 
 - Bails entirely on `<880px` viewport (mobile path handled by CSS).
-- Welcome auto-opens unless `localStorage.fafo_welcome_closed` is set; closing Welcome writes that flag.
+- Welcome auto-opens unless `localStorage.fafo_welcome_closed` is set; closing Welcome writes that flag. Auto-open is deferred when the post-login intro choreography is running.
+- **Episodes window statusbar text is dynamic** — read from `.episode-card` count by `desktop.js`, written to `.episodes-window .dw-status-cell`. Replaces the previous "remember to bump `6 episode(s)`" footgun.
 - Open/close zoom: `setOriginFromIcon()` sets `transform-origin` to the icon's centre relative to the window. `.is-opening` instantly snaps to `scale(0.08) opacity(0)` via `transition: none`; rAF removes the class → CSS transitions back to scale(1) opacity(1). `.is-closing` does the reverse; `setTimeout(180ms)` then sets `hidden=true` and runs side-effects (pause Solitaire video, persist Welcome close).
 - Drag from `.dw-titlebar[data-drag-handle]` (ignored if click hits `.dw-titlebar-controls`). Mousedown reads `getBoundingClientRect`, writes inline `left`/`top`, **and clears `right`/`bottom`** — without that, the window only moves on one axis because the CSS pin still applies. Constraint: ≥80px of titlebar visible horizontally; titlebar can't go above y=0.
 - Focus on mousedown anywhere inside a window: monotonic `topZ` counter (starts at CSS baseline z-index 10) writes to inline `z-index`. `.is-focused` class on focused window; `:not(.is-focused) .dw-titlebar` dims to flat grey (`--w98-shadow`).
 
-**Mobile (<880px).** Desktop chrome (icons, ambient logo, Solitaire window) hidden via `display: none`. Welcome and Episodes wrappers `display: contents` so their inner content flows in normal document flow; titlebar/menubar hidden. **Welcome's `display: contents` selector must out-specify UA's `[hidden]`** (`.app-window[data-window="welcome"]` is 0,0,2,0 vs 0,0,1,0) because `desktop.js` bails before unhiding Welcome — otherwise mobile visitors see no intro text.
+**Mobile (<880px).** Desktop chrome (icons, ambient logo, Solitaire window) hidden via `display: none`. Welcome and Episodes wrappers `display: contents` so their inner content flows in normal document flow; titlebar/menubar hidden. **Welcome's `display: contents` selector must out-specify UA's `[hidden]`** (`.app-window[data-window="welcome"]` is 0,0,2,0 vs 0,0,1,0) because `desktop.js` bails before unhiding Welcome — otherwise mobile visitors see no intro text. **Welcome's `.dw-content` on mobile uses a Win98 panel** (grey face + 2px black border + 2px drop shadow), matching the visual language of the episode portrait boxes below it — replaces an earlier transparent/bare-text rendering.
 
 **Squeeze resilience.** Episodes is the only window wide enough to crowd narrow desktop viewports. Uses `width: clamp(420px, 80vw, 720px)` and `left: clamp(40px, 10vw, 140px)` — original 720/140 at 1440px design target; shrinks to 704/88 at 880px (bumps right margin from 16 → 84). Solitaire and Welcome are right-pinned, no width fluidity needed.
 
-**Cache-bust.** `index.html` references `windows.css?v=phase-X` and `desktop.js?v=phase-X`. Bump the version label when iterating locally — Python's http.server sends no useful cache headers and browsers will hold onto stale scripts. Production deploys via Cloudflare don't need this (their cache is keyed differently); the `?v=` is harmless either way.
+**Cache-bust.** `index.html` references `windows.css?v=intro-N` and `desktop.js?v=intro-N` (the label evolved from `phase-X` once Phases A–F shipped). Bump the version any time those files change so local Python http.server doesn't serve stale scripts. Production deploys via Cloudflare don't need this (their cache is keyed differently); the `?v=` is harmless either way. **Portrait images use the same `?v=N` pattern** — bump on `.episode-portrait` `src` when the underlying file changes.
 
 **Win98 palette `--w98-*` is duplicated in three files** (`docs/index.html`, `docs/login/index.html`, `docs/desktop/windows.css`). Still worth extracting to `docs/assets/w98.css` if a fourth file needs them.
 
@@ -103,10 +118,49 @@ Files: `docs/index.html` (markup), `docs/desktop/windows.css` (style), `docs/des
 
 ## Workflow facts
 
-- Audio lives in Cloudflare R2; download endpoint streams from there.
-- Visitor flow: land → enter email → site → download. Mailing list is collected, not yet sent to.
+- Audio lives in Cloudflare R2; download endpoint streams from there. R2 keys follow `episodes/epNNN.mp3`; `functions/_episodes.ts` maps id → r2_key + display filename.
+- Visitor flow: land → enter email → site → download. The mailing list is now actually sent to — one newsletter per new episode via `tools/send_newsletter.py` (see Newsletter pipeline below).
 - Episode-add automation was written by Codex.
 - Deploy: Cloudflare Pages connected to this GitHub repo, auto-builds on push to `main`.
+
+### Adding a new episode — end-to-end checklist
+
+1. Move portrait into `docs/assets/portraits/<FirstName>.png`.
+2. Add the `<article class="episode-card">` block at the top of the grid in `docs/index.html` (newest first). Bump the portrait's `?v=` if reusing a filename. Description follows `EPISODE_DESCRIPTIONS.md` style.
+3. Add the episode entry to `functions/_episodes.ts` (`id`, `title`, `r2_key`, `filename`).
+4. Upload the MP3 to R2 under the key declared in step 3.
+5. Commit + push. Verify on live: click portrait, confirm MP3 download streams (gate cookie required).
+6. Edit `SUBJECT` + `BODY_TEXT` in `tools/send_newsletter.py`, run `--to-self` to eyeball, then `--schedule "<ISO UTC time>"` for the real send.
+
+## Newsletter pipeline
+
+Sends one email per new episode from `sasha@forkaboutandfindout.co.uk` via Resend. Recipient list is Supabase `mailing_list` filtered to `marketing_opt_in = true`. Free tier: 100 sends/day, 3,000/month.
+
+**Files:**
+- `tools/send_newsletter.py` — Python stdlib only, runs locally.
+- `functions/api/unsubscribe.ts` — Cloudflare Function. Two-step flow: `GET` shows a Win98-styled confirmation page (no DB write — Apple Mail Privacy Protection prefetches links and would otherwise silently unsubscribe people), `POST` sets `marketing_opt_in = false` (preserves the gate cookie row so they're not booted from the site).
+
+**HMAC secret:** unsubscribe URLs are signed with `UNSUBSCRIBE_SECRET`, **deliberately separate** from `GATE_COOKIE_SECRET`. Don't reuse the gate secret — separation of trust domains.
+
+**Local `.env`** at repo root (gitignored):
+```
+SUPABASE_URL=...
+SUPABASE_SERVICE_ROLE_KEY=...
+RESEND_API_KEY=re_...
+UNSUBSCRIBE_SECRET=...   # same value as the CF Pages secret
+```
+
+**Script modes:**
+- `--dry-run` — list recipients + planned send, no API calls. Always run this first.
+- `--to-self` — single test send to the hardcoded `TEST_EMAIL` (defaults to ~2 min from now). Verify deliverability + unsubscribe flow.
+- `--schedule "2026-MM-DDTHH:MM:SSZ"` — full send, queues all emails at Resend. Prompts `yes` to confirm. Scheduled emails can be cancelled in Resend dashboard until they fire.
+
+**Gotchas:**
+- **Resend's API sits behind Cloudflare WAF.** Python's default `urllib` User-Agent (`Python-urllib/3.x`) gets blocked with error code 1010. The script sends a custom `user-agent: FAFO-newsletter/1.0`. Don't strip it.
+- **Gmail collapses content under `---`** as a perceived signature delimiter (RFC says `-- ` with trailing space; Gmail's heuristic is more aggressive). Use inline `P.S.` style for the unsubscribe footer, not a `---` separator — otherwise everything below the separator gets hidden under Gmail's "..." trimmed-content control.
+- Script sets `List-Unsubscribe` + `List-Unsubscribe-Post` headers for Gmail/Yahoo bulk-sender (2024+) compliance — gives a native one-click Unsubscribe button next to the sender name.
+
+**Per-send workflow:** edit the `SUBJECT` and `BODY_TEXT` constants near the top of `send_newsletter.py`. `BODY_TEXT` uses `{first_name}`, `{public_url}`, `{unsubscribe_url}` placeholders. The script's edits are usually uncommitted between sends — fine, the script runs locally.
 
 ## Don't blow it up
 
@@ -129,7 +183,7 @@ Visit `http://localhost:8000/`. The gate's `/api/gate` call will 404; bypass onc
 
 For testing functions/auth locally, set up `wrangler` with a `.dev.vars` file (not done yet). For "is this actually working in prod" checks, push the working branch and use Cloudflare Pages' auto-deployed preview URL.
 
-**Cache-bust during JS iteration.** Python http.server sends no cache-control headers; browsers will serve stale `desktop.js` / `windows.css` for as long as they feel like it. `index.html` references those files with a `?v=phase-X` query — bump the label any time the file changes and the URL changes too, so the browser refetches. Alternative: keep DevTools open with "Disable cache" ticked.
+**Cache-bust during JS iteration.** Python http.server sends no cache-control headers; browsers will serve stale `desktop.js` / `windows.css` for as long as they feel like it. `index.html` references those files with a `?v=intro-N` query — bump the label any time the file changes and the URL changes too, so the browser refetches. Alternative: keep DevTools open with "Disable cache" ticked.
 
 **Preview-tool gotcha:** macOS sandboxes Claude's Python subprocesses from `~/Desktop/`, so the Claude Preview MCP can't serve files from this repo directly. To use `preview_start` / `preview_screenshot`, copy `docs/` to `/tmp/fafo-preview/` first and point `~/.claude/launch.json` at `--directory /tmp/fafo-preview`. The Bash `python3 -m http.server` invocation above is unaffected. Also: the headless preview tab is treated as `document.hidden`, which **pauses CSS transitions and throttles `requestAnimationFrame` to ~0Hz** — animations and rAF-driven code (boot sequence, desktop sim open/close zoom) won't visibly run in the preview. Verify the DOM state at the end; trust the math; eyeball in a real browser for animation polish.
 
@@ -139,6 +193,7 @@ For testing functions/auth locally, set up `wrangler` with a `.dev.vars` file (n
 - Branch: work on `main` directly unless I say otherwise.
 - Media (logos, raw video, .xcf, .mov) lives in a sibling folder `~/Desktop/FAFO/`, not in this repo.
 - Master media + interview files live in Google Drive: `~/Library/CloudStorage/GoogleDrive-sashavarp7@gmail.com/My Drive/FAFO/` (`Brand Assets/`, `Guests/`, `Sound Assets/`, `Windows Templates/`).
+- Article/essay projects derived from the interviews live in a sibling Drive folder `~/Library/CloudStorage/.../My Drive/Journalism/` — one folder per article, each with its own `CLAUDE.md`. First piece: `Journalism/hackathon-article/`.
 - Drive filing convention: guest folders are `epNNN <GuestNameNoSpace>/`, files inside are `epNNN_<GuestNameNoSpace>_<FullInterview|ClipNN|Transcript|AssemblyAI>.<ext>`. Unreleased guests keep a plain `<GuestNameNoSpace>/` folder until they're assigned a number.
 - New scripts in `tools/` should be stdlib-only Python where possible (match `generate_feed.py` and `transcribe.py`) so no `pip install` is needed.
 
@@ -154,7 +209,14 @@ Style guide at `EPISODE_DESCRIPTIONS.md` (repo root). Read it before writing any
 
 ## Transcription
 
-For each new episode MP3:
+**Two pipelines coexist in practice.**
+
+- Eps 001–006: transcribed via **WhisperX** (run elsewhere, not via this repo). Outputs live in `Guests/epNNN <GuestNameNoSpace>/whisperx/*.{txt,srt,vtt,json,tsv}`. The `.txt` is the human-readable transcript; the `.srt`/`.vtt` are timed subtitle formats. No speaker name remap was done — segments are tagged `[SPEAKER_00]` / `[SPEAKER_01]`.
+- Ep 007: transcribed via **AssemblyAI** through `tools/transcribe.py`. Output is `_AssemblyAI.json` + speaker-labelled `_Transcript.md` at the guest folder root (not under `whisperx/`).
+
+For article/quote research, prefer the `.txt` files under `whisperx/` for older episodes and `_Transcript.md` for ep007+.
+
+**Going forward — use `tools/transcribe.py` (AssemblyAI):**
 
 1. `export ASSEMBLYAI_API_KEY="..."` — keep in `~/.zshrc`, never paste in chat.
 2. `python3 tools/transcribe.py <path-to-mp3>` — uploads, runs `universal-2` with `speaker_labels`, polls until done, writes `<base>_AssemblyAI.json` (raw, for analysis) + `<base>_Transcript.md` (speaker-labelled, shareable). ~45-min interview = ~$0.20, ~1 min wall-clock.
