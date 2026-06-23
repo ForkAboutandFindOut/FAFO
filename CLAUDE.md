@@ -17,6 +17,7 @@ Interview series in tech / AI / company creation. Live site: https://forkaboutan
 - `tools/generate_feed.py` — generates `docs/feed.xml` from `episodes.yml`.
 - `tools/transcribe.py` — transcribes a guest MP3 via AssemblyAI (see Transcription section).
 - `tools/send_newsletter.py` — sends a per-episode newsletter via Resend (see Newsletter pipeline below).
+- `tools/md_to_pdf.py` — renders a markdown file to PDF via headless Chrome. Used to produce the recording-day Live Sheet PDF (see Interview prep).
 - `package.json` — only dep is `@supabase/ssr` (used by the functions).
 
 ## Auth gate — how it actually works
@@ -202,6 +203,16 @@ For testing functions/auth locally, set up `wrangler` with a `.dev.vars` file (n
 Per-guest prep follows the template at `~/Library/CloudStorage/.../FAFO/Guests/_Interview_Template.md`. Three-topic structure (Topic 1 = current work, Topic 2 = past/pivot, Topic 3 = broader theme), three `[ANCHOR]` questions that can't be cut, and the closer must cash in the cold-open hook. Read the "Rules" block at the bottom of the template before every recording.
 
 A retrospective audit lives at `~/Library/CloudStorage/.../FAFO/Guests/_Interview_Analysis.md`.
+
+### Live Sheet PDF (recording-day cheat sheet)
+
+Once `epNNN_<GuestName>_Notes.md` is recording-ready, strip it to a sibling `epNNN_<GuestName>_LiveSheet.md` containing only what's needed live: cold open, on-ramp, topic questions (no "context — don't read" paragraphs, no Appendix), three-anchor reminder, closer, pre-flight checklist. Then render to PDF:
+
+```
+python3 tools/md_to_pdf.py <input.md> <output.pdf>
+```
+
+`md_to_pdf.py` is stdlib-only and shells out to `/Applications/Google Chrome.app` headless (macOS path is hard-coded). Renderer supports h1-h3, bold/italic, bulleted + numbered lists with one level of nesting, blockquotes, `---` rules, `- [ ]` checkboxes, and an `[ANCHOR]` highlight. It is **not** a general-purpose markdown converter — tables, code blocks, and links aren't supported. The Notes.md file stays untouched as the research record.
 
 ## Episode descriptions
 
