@@ -204,6 +204,16 @@ Per-guest prep follows the template at `~/Library/CloudStorage/.../FAFO/Guests/_
 
 A retrospective audit lives at `~/Library/CloudStorage/.../FAFO/Guests/_Interview_Analysis.md`.
 
+### Sasha's question-wording preferences
+
+Apply when drafting per-guest Notes (especially the cold open and on-ramp). These are calibrations from his post-draft edits on ep008 and ep009.
+
+- **Spell out organisation names** in the cold open. "Entrepreneurs First", not "EF"; "University College Dublin", not "UCD" on first mention. Reads cleaner aloud.
+- **Understated over sharp.** Kill rhetorical flourish in the cold open and on-ramp. Let the facts carry the weight. *"He also recently became a dropout"* lands better than *"he's the case study walking around in the week the column is being written."* If you write a hook with a 🥁-roll feel to it, cut it.
+- **No meta-framing inside questions.** Drop `[OPTIONAL WARM-UP]`-style markers and preambles like "Before any of the AI stuff —" or "Stand back —" inside the question text. Just ask the question.
+- **Split stacked questions.** Multi-clause questions get split: primary in the `[QUESTION]` line, the second half as a separate indented `[FOLLOW UP]` bullet. One thing at a time.
+- **Use real mutual context when it exists** (shared workplaces, mutual connections) as the on-ramp rather than a generic biographical opener. Anecdotal first ("what's the most ridiculous pitch you saw…"), analytical work goes in Topic 2/3.
+
 ### Live Sheet PDF (recording-day cheat sheet)
 
 Once `epNNN_<GuestName>_Notes.md` is recording-ready, strip it to a sibling `epNNN_<GuestName>_LiveSheet.md` containing only what's needed live: cold open, on-ramp, topic questions (no "context — don't read" paragraphs, no Appendix), three-anchor reminder, closer, pre-flight checklist. Then render to PDF:
@@ -222,10 +232,12 @@ Style guide at `EPISODE_DESCRIPTIONS.md` (repo root). Read it before writing any
 
 **Two pipelines coexist in practice.**
 
-- Eps 001–006: transcribed via **WhisperX** (run elsewhere, not via this repo). Outputs live in `Guests/epNNN <GuestNameNoSpace>/whisperx/*.{txt,srt,vtt,json,tsv}`. The `.txt` is the human-readable transcript; the `.srt`/`.vtt` are timed subtitle formats. No speaker name remap was done — segments are tagged `[SPEAKER_00]` / `[SPEAKER_01]`.
-- Ep 007: transcribed via **AssemblyAI** through `tools/transcribe.py`. Output is `_AssemblyAI.json` + speaker-labelled `_Transcript.md` at the guest folder root (not under `whisperx/`).
+- Eps 001–006 + Theo Bui (unreleased): originally transcribed via **WhisperX** (run elsewhere, not via this repo). Outputs live in `Guests/epNNN <GuestNameNoSpace>/whisperx/*.{txt,srt,vtt,json,tsv}`. The `.txt` is the human-readable transcript; the `.srt`/`.vtt` are timed subtitle formats. The WhisperX JSON does have `[SPEAKER_00]` / `[SPEAKER_01]` segment tags, but the older runs have noticeable hallucination artefacts (random guest/company names dropped into mid-sentence). **Don't share WhisperX-era transcripts externally without a clean-up pass — better to re-transcribe.**
+- Ep 007+ and any back-fills you need to share: transcribed via **AssemblyAI** through `tools/transcribe.py`. Output is `_AssemblyAI.json` + speaker-labelled `_Transcript.md` at the guest folder root (not under `whisperx/`).
 
-For article/quote research, prefer the `.txt` files under `whisperx/` for older episodes and `_Transcript.md` for ep007+.
+**If you need to back-fill a WhisperX-era episode for sharing** (Theo Bui was the first instance, 2026-06-23): re-run via AssemblyAI — `python3 tools/transcribe.py path/to/<Guest>_FullInterview.mp3`. The `_Transcript.md` gets overwritten cleanly. AssemblyAI labels speakers "Speaker A / Speaker B" by default; do a one-off remap pass to rename to "Sasha / <Guest>" and merge any over-split IDs (host = A, guest sometimes split across B+C). Cost ≈ $0.20 per ~45-min interview, ~1 min wall-clock.
+
+For article/quote research, prefer the `.txt` files under `whisperx/` for older un-shared episodes and `_Transcript.md` for anything that's been through AssemblyAI.
 
 **Going forward — use `tools/transcribe.py` (AssemblyAI):**
 
