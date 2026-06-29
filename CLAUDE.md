@@ -204,6 +204,15 @@ Per-guest prep follows the template at `~/Library/CloudStorage/.../FAFO/Guests/_
 
 A retrospective audit lives at `~/Library/CloudStorage/.../FAFO/Guests/_Interview_Analysis.md`.
 
+### Prep workflow (per-guest Notes)
+
+Workflow patterns from ep008 and ep009 prep:
+
+- **Confirm topics before deep prep.** For each new guest, present 3–5 candidate Topic 3 options with one-line rationale each, and get explicit confirmation before researching or drafting. Sasha pivots — ep009 went defence-pilled → chess → no-third-topic in a single session. Confirm to save rework.
+- **Three topics is the template default; two is fine.** If the guest's published content doesn't support a strong third broader theme, ship a tighter two-topic structure (~20 min per topic) rather than forcing one. Keep three anchors regardless — promote a second anchor from one of the existing topics rather than dropping the anchor count.
+- **Cold open names the main topic.** Sasha's preferred form announces the central topic up front ("…which will be the main topic of discussion in this interview") rather than teasing it abstractly. Cleaner for the listener.
+- **Topics get signed off independently.** When Sasha says "happy with Topic X", treat that topic as locked — apply requested tweaks only to the un-signed-off topics, don't drift back into the approved one.
+
 ### Sasha's question-wording preferences
 
 Apply when drafting per-guest Notes (especially the cold open and on-ramp). These are calibrations from his post-draft edits on ep008 and ep009.
