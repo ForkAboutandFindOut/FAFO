@@ -212,6 +212,7 @@ Workflow patterns from ep008 and ep009 prep:
 - **Three topics is the template default; two is fine.** If the guest's published content doesn't support a strong third broader theme, ship a tighter two-topic structure (~20 min per topic) rather than forcing one. Keep three anchors regardless — promote a second anchor from one of the existing topics rather than dropping the anchor count.
 - **Cold open names the main topic.** Sasha's preferred form announces the central topic up front ("…which will be the main topic of discussion in this interview") rather than teasing it abstractly. Cleaner for the listener.
 - **Topics get signed off independently.** When Sasha says "happy with Topic X", treat that topic as locked — apply requested tweaks only to the un-signed-off topics, don't drift back into the approved one.
+- **Track sign-off with a STATUS block at the top of the Notes.** Format: `**STATUS (yyyy-mm-dd):** Topic 1 signed off. Topic 2 needs rewrite to focus on X — drop Y, deepen Z. Cold open, on-ramp, anchors, closer are Sasha's current preferred versions — don't touch without asking.` The "don't touch without asking" marker on signed-off sections is load-bearing; respect it on subsequent passes.
 
 ### Sasha's question-wording preferences
 
@@ -221,7 +222,8 @@ Apply when drafting per-guest Notes (especially the cold open and on-ramp). Thes
 - **Understated over sharp.** Kill rhetorical flourish in the cold open and on-ramp. Let the facts carry the weight. *"He also recently became a dropout"* lands better than *"he's the case study walking around in the week the column is being written."* If you write a hook with a 🥁-roll feel to it, cut it.
 - **No meta-framing inside questions.** Drop `[OPTIONAL WARM-UP]`-style markers and preambles like "Before any of the AI stuff —" or "Stand back —" inside the question text. Just ask the question.
 - **Split stacked questions.** Multi-clause questions get split: primary in the `[QUESTION]` line, the second half as a separate indented `[FOLLOW UP]` bullet. One thing at a time.
-- **Use real mutual context when it exists** (shared workplaces, mutual connections) as the on-ramp rather than a generic biographical opener. Anecdotal first ("what's the most ridiculous pitch you saw…"), analytical work goes in Topic 2/3.
+- **Use real mutual context when it exists** (shared workplaces, mutual connections) as the on-ramp rather than a generic biographical opener. Anecdotal first ("what's the most ridiculous pitch you saw…"), analytical work goes in Topic 2/3. **Don't put "we were both there" questions inside analytical topics** — they read as fishing for shared gossip or making the topic about the host. Shared-observation questions belong in the on-ramp only.
+- **Don't put the guest's own CV on trial.** Questions framed as "your CV reads like X, how do you square that?" get softened to "is that where Y came from?" — connect the topic to the interview's arc rather than surface a contradiction. Guest interviews are exploration, not accountability journalism.
 
 ### Live Sheet PDF (recording-day cheat sheet)
 
@@ -232,6 +234,8 @@ python3 tools/md_to_pdf.py <input.md> <output.pdf>
 ```
 
 `md_to_pdf.py` is stdlib-only and shells out to `/Applications/Google Chrome.app` headless (macOS path is hard-coded). Renderer supports h1-h3, bold/italic, bulleted + numbered lists with one level of nesting, blockquotes, `---` rules, `- [ ]` checkboxes, and an `[ANCHOR]` highlight. It is **not** a general-purpose markdown converter — tables, code blocks, and links aren't supported. The Notes.md file stays untouched as the research record.
+
+**LiveSheet pass also cleans scratch artifacts** the Notes tolerate but the read-live cheat sheet shouldn't: rich-text paste escapes (`*\*[FOLLOW UP] \*\*` → `**[FOLLOW UP]**`), missing terminal question marks, escaped asterisks. **Date-sensitive anchor questions** use `x days ago` as a placeholder in Notes; fill in the actual value on the LiveSheet pass (or, if recording date isn't locked, keep the placeholder and add a pre-flight checkbox reminding Sasha to fill it in).
 
 ## Episode descriptions
 
