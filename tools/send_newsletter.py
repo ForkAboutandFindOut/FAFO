@@ -56,18 +56,14 @@ REPLY_TO = "sasha@forkaboutandfindout.co.uk"
 
 # Subject + body. Edit before each new episode. Body is plain text with
 # {first_name} and {unsubscribe_url} placeholders — formatted per recipient.
-SUBJECT = "'The Importance of Randomness' — ep 7 of Fork About and Find Out"
+SUBJECT = "'Dropping Out of Oxford' — ep 8 of Fork About and Find Out"
 
 BODY_TEXT = """\
 Hi {first_name},
 
-My name is Sasha and at some point in the last few months you opted into the FAFO mailing list. It's been a minute, but this is the first time I'm actually writing! For now, I'll be sending an email every time a new episode comes out. Opt-out link is at the bottom if that's too much :)
+Episode 8 is up: 'Dropping Out of Oxford' with Prince Kumar.
 
-More importantly, Episode 7 is out: 'The Importance of Randomness' with Fatema Al Khalifa.
-
-Fatema is the CEO of Unicorn Mafia, an invite-only, London based community of a thousand of the city's most talented developers. Think Anthropic, OpenAI, xAI, Imperial... you get the picture. She's the person deciding who gets in, so this was a pretty cool interview.
-
-One of the key topics we discussed was a philosophy she calls FACV: 'F*ck Around and Create Value' (close enough to our very own FAFO). It's built on the idea that randomness between very talented people creates disproportionate value.
+Three weeks ago Prince dropped out of Oxford in his first year to join microagi, a robotics startup building embodied AI. We opened on the dropout decision itself, dissecting his statement that Oxford lacks 'original thinking.' This led to a discussion on why UK startup ambition sits behind the US, or the Tall Poppy Syndrome as Prince labels it. We also touched on Prince's time at Entrepreneurs First, confirming the origins of his dropout mentality.
 
 To listen to the full interview:
 
@@ -76,8 +72,6 @@ To listen to the full interview:
 Lots of love,
 
 Sasha
-
-P.S. If you'd rather not get these, you can unsubscribe here: {unsubscribe_url}
 """
 
 
