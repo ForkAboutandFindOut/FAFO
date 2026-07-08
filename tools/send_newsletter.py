@@ -69,9 +69,7 @@ To listen to the full interview:
 
 {public_url}/
 
-Lots of love,
-
-Sasha
+lots of love :)
 """
 
 

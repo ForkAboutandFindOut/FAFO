@@ -197,10 +197,16 @@
     openWindow('welcome');
   }
 
-  // Wire desktop icons. Pass the icon element so the open animation knows
-  // where to scale-from.
+  // Wire desktop icons. Clicking an icon toggles its window: open if it's
+  // closed, close if it's already visible. Pass the icon element so the
+  // open animation knows where to scale-from.
   document.querySelectorAll('.desktop-icon[data-opens]').forEach((btn) => {
-    btn.addEventListener('click', () => openWindow(btn.dataset.opens, btn));
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.opens;
+      const win = windows[id];
+      if (win && !win.hidden) closeWindow(id);
+      else openWindow(id, btn);
+    });
   });
 
   // Wire close buttons inside windows.
@@ -225,14 +231,16 @@
 
       e.preventDefault(); // suppress text selection while dragging
 
-      // Snapshot the window's CURRENT viewport rect. This works even when
-      // the window was positioned via right/bottom in CSS — we just read
-      // the computed left/top and use them as the drag anchor.
+      // Snapshot the window's CURRENT position, converted to be relative
+      // to its offsetParent (.desktop). Using getBoundingClientRect alone
+      // returns viewport coords — writing those back to style.left/top
+      // caused a visible ~16px snap because .desktop has inset: 16px.
+      const parentRect = (win.offsetParent || document.documentElement).getBoundingClientRect();
       const r = win.getBoundingClientRect();
       startMouseX = e.clientX;
       startMouseY = e.clientY;
-      startLeft = r.left;
-      startTop = r.top;
+      startLeft = r.left - parentRect.left;
+      startTop = r.top - parentRect.top;
 
       // Convert to inline left/top so the CSS right/bottom rules don't
       // fight us as we move. Clearing right/bottom is essential — without
