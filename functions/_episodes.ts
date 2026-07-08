@@ -48,10 +48,13 @@ export const EPISODES: Episode[] = [
     r2_key: "episodes/ep007.mp3",
     filename: "FAFO_ep007_FatemaAlKhalifa.mp3",
   },
-  {
-    id: "ep008",
-    title: "Prince Kumar",
-    r2_key: "episodes/ep008.mp3",
-    filename: "FAFO_ep008_PrinceKumar.mp3",
-  },
+  // ep008 Prince Kumar temporarily hidden — awaiting revised MP3.
+  // Restore by uncommenting this block AND the matching article in
+  // docs/index.html.
+  // {
+  //   id: "ep008",
+  //   title: "Prince Kumar",
+  //   r2_key: "episodes/ep008.mp3",
+  //   filename: "FAFO_ep008_PrinceKumar.mp3",
+  // },
 ];
