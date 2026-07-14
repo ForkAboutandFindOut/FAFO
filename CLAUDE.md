@@ -88,7 +88,7 @@ Plays on the homepage, *after* the boot sequence, on the visitor's first arrival
 
 Files: `docs/index.html` (markup), `docs/desktop/windows.css` (style), `docs/desktop/desktop.js` (window manager, ~150 lines, vanilla, no deps).
 
-**Structure.** `<main class="desktop">` contains: ambient spinning logo (`<video class="ambient-logo">`, transparent VP8-alpha webm, 80vmin, opacity 1 — was 0.35, bumped for hero presence); icon strip top-left (`<ul class="desktop-icons">`, three icons: Welcome / Episodes / Solitaire); three `<section class="app-window" data-window="…" hidden>` (Welcome, Solitaire, Episodes). Icons unhide the corresponding window on click. Welcome auto-opens on first visit *unless* the intro choreography is running, in which case it opens after the 3s logo fade.
+**Structure.** `<main class="desktop">` contains: ambient spinning logo (`<video class="ambient-logo">`, transparent VP8-alpha webm, 80vmin, opacity 1 — was 0.35, bumped for hero presence); icon strip top-left (`<ul class="desktop-icons">`, three icons: Welcome / Episodes / Solitaire); three `<section class="app-window" data-window="…" hidden>` (Welcome, Solitaire, Episodes). Icons **toggle** the corresponding window on click — open if hidden, close if visible (closing Welcome via icon still writes `fafo_welcome_closed`, matching the X-button behaviour). Welcome auto-opens on first visit *unless* the intro choreography is running, in which case it opens after the 3s logo fade.
 
 **Browser-edge resize buffer.** `.desktop { inset: 16px }` exposes a 16px frame of teal `<html>` background at the viewport edge. The cursor declarations are scoped to `body *` (not `*`), so `html` keeps the system cursor — and the browser's window-resize cursor can take over cleanly when you slide toward the Chrome tab edge. The teal-on-teal frame is visually invisible.
 
@@ -100,7 +100,7 @@ Files: `docs/index.html` (markup), `docs/desktop/windows.css` (style), `docs/des
 - Welcome auto-opens unless `localStorage.fafo_welcome_closed` is set; closing Welcome writes that flag. Auto-open is deferred when the post-login intro choreography is running.
 - **Episodes window statusbar text is dynamic** — read from `.episode-card` count by `desktop.js`, written to `.episodes-window .dw-status-cell`. Replaces the previous "remember to bump `6 episode(s)`" footgun.
 - Open/close zoom: `setOriginFromIcon()` sets `transform-origin` to the icon's centre relative to the window. `.is-opening` instantly snaps to `scale(0.08) opacity(0)` via `transition: none`; rAF removes the class → CSS transitions back to scale(1) opacity(1). `.is-closing` does the reverse; `setTimeout(180ms)` then sets `hidden=true` and runs side-effects (pause Solitaire video, persist Welcome close).
-- Drag from `.dw-titlebar[data-drag-handle]` (ignored if click hits `.dw-titlebar-controls`). Mousedown reads `getBoundingClientRect`, writes inline `left`/`top`, **and clears `right`/`bottom`** — without that, the window only moves on one axis because the CSS pin still applies. Constraint: ≥80px of titlebar visible horizontally; titlebar can't go above y=0.
+- Drag from `.dw-titlebar[data-drag-handle]` (ignored if click hits `.dw-titlebar-controls`). Mousedown reads `getBoundingClientRect`, converts to **offsetParent-relative** coords (subtract `offsetParent.getBoundingClientRect()`), writes inline `left`/`top`, **and clears `right`/`bottom`**. Without the offsetParent subtraction the window snaps 16px down-right on mousedown because `.desktop { inset: 16px }` shifts the containing block; without clearing right/bottom the window only moves on one axis because the CSS pin still applies. Constraint: ≥80px of titlebar visible horizontally; titlebar can't go above y=0.
 - Focus on mousedown anywhere inside a window: monotonic `topZ` counter (starts at CSS baseline z-index 10) writes to inline `z-index`. `.is-focused` class on focused window; `:not(.is-focused) .dw-titlebar` dims to flat grey (`--w98-shadow`).
 
 **Mobile (<880px).** Desktop chrome (icons, ambient logo, Solitaire window) hidden via `display: none`. Welcome and Episodes wrappers `display: contents` so their inner content flows in normal document flow; titlebar/menubar hidden. **Welcome's `display: contents` selector must out-specify UA's `[hidden]`** (`.app-window[data-window="welcome"]` is 0,0,2,0 vs 0,0,1,0) because `desktop.js` bails before unhiding Welcome — otherwise mobile visitors see no intro text. **Welcome's `.dw-content` on mobile uses a Win98 panel** (grey face + 2px black border + 2px drop shadow), matching the visual language of the episode portrait boxes below it — replaces an earlier transparent/bare-text rendering.
@@ -132,6 +132,14 @@ Files: `docs/index.html` (markup), `docs/desktop/windows.css` (style), `docs/des
 4. Upload the MP3 to R2 under the key declared in step 3.
 5. Commit + push. Verify on live: click portrait, confirm MP3 download streams (gate cookie required).
 6. Edit `SUBJECT` + `BODY_TEXT` in `tools/send_newsletter.py`, run `--to-self` to eyeball, then `--schedule "<ISO UTC time>"` for the real send.
+
+### Temporarily hiding an episode
+
+When a guest wants revisions post-publish, or an MP3 needs a swap:
+
+1. Wrap the `<article class="episode-card">` in `docs/index.html` with `<!-- ... -->` (leave the markup in place for easy restore — leave a one-line note in the comment pointing at the `_episodes.ts` twin).
+2. Comment out the matching entry in `functions/_episodes.ts` so `/api/episodes/epNNN/download` 404s. Without this, the R2 object stays streamable to anyone who knows the URL — the card disappearing from the grid isn't enough.
+3. R2 object stays untouched. Overwrite it at the same key when the revised MP3 lands, then uncomment both blocks.
 
 ## Newsletter pipeline
 
@@ -261,3 +269,5 @@ For article/quote research, prefer the `.txt` files under `whisperx/` for older 
 3. **AssemblyAI often over-splits one speaker into multiple IDs** (e.g. host = A, guest gets split across B and C). After the script runs, do a one-off Python pass to remap speakers to real names and merge consecutive same-speaker turns. See ep007 for the pattern.
 4. Hand-pass for mishears before sharing with the guest — proper nouns and in-jokes are where the model misses. Spot-check by reading end-to-end at least once.
 5. Send raw to the guest unless they ask for a cleaned version — let them flag their own preferred edits.
+
+**Re-transcribing after guest-requested cuts:** before rerunning `transcribe.py` on a revised MP3, rename the existing `_Transcript.md` + `_AssemblyAI.json` with a `_precut` suffix (the script overwrites both by default, and the pre-cut version is the reference for "what was said originally"). After rerunning + remapping, verify the cuts landed by phrase-searching the new transcript against the guest's cut list (regex per flagged phrase → "still present" vs. "cut"). Also read the transcript around each seam — cuts can leave dangling references or non-sequiturs that the guest won't notice on playback but a listener will. Cheap sanity check: `new_mp3_bytes / old_mp3_bytes × old_duration ≈ new_duration` (CBR mp3 duration scales with file size).
