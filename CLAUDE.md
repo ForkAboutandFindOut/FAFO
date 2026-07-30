@@ -140,6 +140,7 @@ When a guest wants revisions post-publish, or an MP3 needs a swap:
 1. Wrap the `<article class="episode-card">` in `docs/index.html` with `<!-- ... -->` (leave the markup in place for easy restore — leave a one-line note in the comment pointing at the `_episodes.ts` twin).
 2. Comment out the matching entry in `functions/_episodes.ts` so `/api/episodes/epNNN/download` 404s. Without this, the R2 object stays streamable to anyone who knows the URL — the card disappearing from the grid isn't enough.
 3. R2 object stays untouched. Overwrite it at the same key when the revised MP3 lands, then uncomment both blocks.
+4. **Before rerunning `send_newsletter.py` after a hide period,** refresh any date references in the body — a hide can last weeks and *"three weeks ago Prince dropped out"* stops being true. Also double-check via the Resend dashboard whether the original send actually fired before the hide (the send-scoped API key can't check for you).
 
 ## Newsletter pipeline
 
@@ -168,6 +169,8 @@ UNSUBSCRIBE_SECRET=...   # same value as the CF Pages secret
 - **Resend's API sits behind Cloudflare WAF.** Python's default `urllib` User-Agent (`Python-urllib/3.x`) gets blocked with error code 1010. The script sends a custom `user-agent: FAFO-newsletter/1.0`. Don't strip it.
 - **Gmail collapses content under `---`** as a perceived signature delimiter (RFC says `-- ` with trailing space; Gmail's heuristic is more aggressive). Use inline `P.S.` style for the unsubscribe footer, not a `---` separator — otherwise everything below the separator gets hidden under Gmail's "..." trimmed-content control.
 - Script sets `List-Unsubscribe` + `List-Unsubscribe-Post` headers for Gmail/Yahoo bulk-sender (2024+) compliance — gives a native one-click Unsubscribe button next to the sender name.
+- **Past `scheduled_at` fails 422 for every recipient before any email is queued.** Fail-fast is a feature — safe to retry immediately with a corrected time. Compute the UTC target with `date -u` first when working across timezones; the local clock and Resend's server clock can also drift enough to trip the check by a couple of minutes.
+- **`RESEND_API_KEY` here is send-scoped (restricted).** All read endpoints (`GET /emails`, `/domains`, `/broadcasts`, `/audiences`, `/api-keys`) return 401 `restricted_api_key`. Claude can't check what was actually sent via API — use the Resend dashboard, or check `sashavarp7@gmail.com`'s inbox (the `TEST_EMAIL` address is on the live mailing list, so every real send lands there too).
 
 **Per-send workflow:** edit the `SUBJECT` and `BODY_TEXT` constants near the top of `send_newsletter.py`. `BODY_TEXT` uses `{first_name}`, `{public_url}`, `{unsubscribe_url}` placeholders. The script's edits are usually uncommitted between sends — fine, the script runs locally.
 
@@ -223,6 +226,11 @@ Workflow patterns from ep008 and ep009 prep:
 - **Track sign-off with a STATUS block at the top of the Notes.** Format: `**STATUS (yyyy-mm-dd):** Topic 1 signed off. Topic 2 needs rewrite to focus on X — drop Y, deepen Z. Cold open, on-ramp, anchors, closer are Sasha's current preferred versions — don't touch without asking.` The "don't touch without asking" marker on signed-off sections is load-bearing; respect it on subsequent passes.
 - **Verification pass before recording.** For every question that depends on a specific quote, number, or date, cross-check against ≥2 independent sources. Nested search-result summaries can propagate transcription errors — a paraphrase-of-a-paraphrase can move a number by an order of magnitude (real case in ep010 prep: `$19M` should have been `$90M`, caught by a second-source pass). Flag unverified items inline with `[VERIFY]`; clear or explicitly downgrade to "surfacing consistently but unconfirmed" before recording. Document the pass in the STATUS block.
 - **Crash course file for technically dense topics.** When the guest's domain needs vocab Sasha doesn't have (finance/VC, crypto, hard sciences), draft a companion `crash_course.md` in the guest folder. Modular (Module 0 = calibration questions → progressive vocab and mental-model modules → mock interview at the end). Sasha answers Check Yourself questions in chat between modules; Claude grades and pushes back. Ends with a mock-interview role-play where Claude plays the guest. Precedents: ep009 Diya (`topic1_crash_course.md`), ep010 Konoplyasty (`crash_course.md`).
+- **Single-topic-with-coda structure.** A valid variant of the "two topics is fine" rule: one deep-dive topic plus a broader/philosophical coda at the end (~3–5 questions). Topic 1 can carry more sub-arcs than usual (six labelled 1a–1f is fine — pace ~4 min each). Anchors: one in the framing sub-arc, one late in Topic 1, one in the coda. Precedent: Theo Bui ep009 (8x + AI-and-human-labor coda).
+
+### Re-records
+
+When a guest is re-recorded — guest-requested cuts, a full redo, or a follow-up months later — the new prep treats them as a first appearance. **No "you told me last time," no "in May you said."** The old transcript stays in the folder as Sasha-eyes-only prep material. Cold open should not reference that the previous recording happened. First instance: Theo Bui, re-recording as ep009 in July 2026 after the original May cut was superseded.
 
 ### Sasha's question-wording preferences
 
@@ -234,6 +242,9 @@ Apply when drafting per-guest Notes (especially the cold open and on-ramp). Thes
 - **Split stacked questions.** Multi-clause questions get split: primary in the `[QUESTION]` line, the second half as a separate indented `[FOLLOW UP]` bullet. One thing at a time.
 - **Use real mutual context when it exists** (shared workplaces, mutual connections) as the on-ramp rather than a generic biographical opener. Anecdotal first ("what's the most ridiculous pitch you saw…"), analytical work goes in Topic 2/3. **Don't put "we were both there" questions inside analytical topics** — they read as fishing for shared gossip or making the topic about the host. Shared-observation questions belong in the on-ramp only.
 - **Don't put the guest's own CV on trial.** Questions framed as "your CV reads like X, how do you square that?" get softened to "is that where Y came from?" — connect the topic to the interview's arc rather than surface a contradiction. Guest interviews are exploration, not accountability journalism.
+- **Don't leave `[VERIFY]` on facts Sasha has personally confirmed.** The marker is for anything Claude couldn't cross-check independently. Once Sasha's checked with the guest directly (text, DMs, in-person) and OK'd it for on-air use, strip the marker — leaving it in on a resolved item adds noise. Don't over-flag either: when the host is in direct contact with the guest, source-strictness relaxes.
+- **Don't tease the coda / broader-theme topic in the cold open.** The cold open names Topic 1 only. The end-of-interview zoom-out questions surface naturally when Sasha pivots to them — pre-announcing them front-loads the cold open. (Learned on Theo ep009: draft included a coda tease, Sasha stripped it.)
+- **Prefer conversational phrasing over analytical framing, even when it costs specificity.** "When did you feel the company really started growing?" lands better than "where did the growth curve actually bend?" Sasha trims tight, MBA-adjacent phrasings on every pass. Give questions room for the guest to interpret.
 
 ### Live Sheet PDF (recording-day cheat sheet)
 
@@ -250,6 +261,22 @@ python3 tools/md_to_pdf.py <input.md> <output.pdf>
 ## Episode descriptions
 
 Style guide at `EPISODE_DESCRIPTIONS.md` (repo root). Read it before writing any new `data-desc` text on an `.episode-card` in `docs/index.html`. Three-act shape, 60–90 words, earnest (no hype), and the cold-open hook from the prep notes should inform the description's framing.
+
+## LinkedIn per-clip promo
+
+For the LinkedIn post that goes up alongside an episode video clip:
+
+- **~40 words**, hook-first. LinkedIn videos autoplay muted, so the first line has to work without audio.
+- **Journalistic voice** — same tone as the episode-card descriptions. No emojis, no exclamation marks. Setup-then-reveal beats hot-take framing.
+- **End with the link on its own line:** `Ep NNN of Fork About and Find Out — forkaboutandfindout.co.uk`. LinkedIn de-prioritises external links, so keep them at the end, not the top.
+- **Tags on their own line at the end.** Type `@GuestName` and `@Company` in the composer — LinkedIn auto-suggests correct profiles. End-tags read cleaner than inline tags and the tagged party still gets notified.
+- **Timing.** If a per-episode newsletter is also going out, aim for both to land within the same hour — `--schedule` the newsletter to match the LinkedIn drop.
+
+Precedent — ep008 Prince clip01 (Jul 2026):
+
+> Before he worked at Entrepreneurs First, Prince Kumar wasn't thinking about dropping out of Oxford. A year later, he did.
+>
+> Ep008 of Fork About and Find Out — forkaboutandfindout.co.uk
 
 ## Transcription
 
