@@ -56,14 +56,14 @@ REPLY_TO = "sasha@forkaboutandfindout.co.uk"
 
 # Subject + body. Edit before each new episode. Body is plain text with
 # {first_name} and {unsubscribe_url} placeholders — formatted per recipient.
-SUBJECT = "'Dropping Out of Oxford' — ep 8 of Fork About and Find Out"
+SUBJECT = "'Jevons Paradox' — ep 9 of Fork About and Find Out"
 
 BODY_TEXT = """\
 Hi {first_name},
 
-Episode 8 is up: 'Dropping Out of Oxford' with Prince Kumar.
+Episode 9 is up: 'Jevons Paradox' with Theo Bui.
 
-Three weeks ago Prince dropped out of Oxford in his first year to join microagi, a robotics startup building embodied AI. We opened on the dropout decision itself, dissecting his statement that Oxford lacks 'original thinking.' This led to a discussion on why UK startup ambition sits behind the US, or the Tall Poppy Syndrome as Prince labels it. We also touched on Prince's time at Entrepreneurs First, confirming the origins of his dropout mentality.
+Theo is co-founder and CTO of 8x, an orchestration platform for human work with over 200,000 people across more than 30 countries. Our conversation started with the framing, why 'orchestration' rather than 'agency'. We then moved through 8x's growth curve, its playbook of chasing under-covered organic lanes, its hackathon-driven hiring rotation across London, Ljubljana and Berlin. We finished on where AI has actually made 8x need more humans, not fewer.
 
 To listen to the full interview:
 
