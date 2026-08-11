@@ -54,4 +54,10 @@ export const EPISODES: Episode[] = [
     r2_key: "episodes/ep008.mp3",
     filename: "FAFO_ep008_PrinceKumar.mp3",
   },
+  {
+    id: "ep009",
+    title: "Theo Bui",
+    r2_key: "episodes/ep009.mp3",
+    filename: "FAFO_ep009_TheoBui.mp3",
+  },
 ];
