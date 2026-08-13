@@ -26,9 +26,11 @@ Despite the filename `send-otp.ts`, there is **no real OTP**. Live flow:
 
 1. `/login/` form → `POST /api/subscribe` with email + name.
 2. `/api/subscribe` upserts to Supabase `mailing_list` table, then sets a HMAC-signed cookie `fafo_gate` (180 days).
-3. Homepage inline script calls `/api/gate` to verify the cookie; on success caches `localStorage.fafo_access=1`.
+3. Homepage inline script (in `docs/index.html` `<head>`) calls `/api/gate` on **every** page load and classifies the response as `"ok"` (200 — set `localStorage.fafo_access=1`), `"denied"` (401 — clear the flag, redirect to `/login/?next=<current>`), or `"unknown"` (404, 5xx, network error, malformed JSON — no-op). `localStorage.fafo_access` is a fast-render hint that lets the page paint without blocking on the check; the `fafo_gate` cookie is the source of truth.
 
-So the gate is mailing-list capture, not authentication — anyone can type any email and get in. Don't break the "returning visitor skips login" path.
+**Don't "simplify" the gate script back to trusting localStorage without re-verifying.** An earlier version skipped `/api/gate` entirely when the flag was set, so expired cookies silently broke downloads (Chrome renders 401 on an `<a download>` as *"Failed - Not available on site"*) while the site UI still rendered normally, leaving the user with no recoverable path. The `"unknown"` branch exists to preserve the local static-preview bypass (which 404s `/api/gate`) and to avoid kicking users out on transient network issues.
+
+So the gate is mailing-list capture, not authentication — anyone can type any email and get in.
 
 **Dead code:** `functions/api/send-otp.ts` and `functions/auth/callback.ts` aren't reached by the live login form. Either old or future. Don't delete without asking.
 
