@@ -174,28 +174,21 @@
     welcomeWasClosed = !!localStorage.getItem(STORAGE_KEY);
   } catch (e) {}
 
-  // Intro choreography. The inline head script in index.html set
-  // html.fafo-intro if the visitor just came through the login flow.
-  // If so: logo fades in over 3s, then icons fade in and Welcome opens
-  // with its existing zoom animation.
-  const justLoggedIn = document.documentElement.classList.contains('fafo-intro');
-  try { sessionStorage.removeItem('fafo_just_logged_in'); } catch (e) {}
-
-  if (justLoggedIn) {
-    // Force a layout pass so the initial opacity:0 state is committed
-    // before we flip the class — otherwise the browser would batch both
-    // changes and skip the transition.
-    void document.documentElement.offsetWidth;
-    requestAnimationFrame(function () {
-      document.documentElement.classList.add('fafo-intro-logo-in');
-    });
-    setTimeout(function () {
-      document.documentElement.classList.add('fafo-intro-icons-in');
-      if (!welcomeWasClosed) openWindow('welcome');
-    }, 3000);
-  } else if (!welcomeWasClosed) {
-    openWindow('welcome');
-  }
+  // Intro choreography. The inline head script in index.html sets
+  // html.fafo-intro on every visit (used to be login-only), so the logo
+  // fades in over 3s, then icons fade in and Welcome auto-opens (unless
+  // previously dismissed) with its existing zoom animation.
+  // Force a layout pass so the initial opacity:0 state is committed
+  // before we flip the class — otherwise the browser would batch both
+  // changes and skip the transition.
+  void document.documentElement.offsetWidth;
+  requestAnimationFrame(function () {
+    document.documentElement.classList.add('fafo-intro-logo-in');
+  });
+  setTimeout(function () {
+    document.documentElement.classList.add('fafo-intro-icons-in');
+    if (!welcomeWasClosed) openWindow('welcome');
+  }, 3000);
 
   // Wire desktop icons. Clicking an icon toggles its window: open if it's
   // closed, close if it's already visible. Pass the icon element so the
@@ -289,5 +282,75 @@
   // window is already on top by the time the click handler runs.
   document.querySelectorAll('.app-window').forEach((win) => {
     win.addEventListener('mousedown', () => focusWindow(win));
+  });
+
+  // --- Mail CTA (from Welcome) opens the Mail window instead of the
+  // default anchor scroll. On mobile this file bails before running, so
+  // the anchor href="#mail" falls through to native scroll to the inline
+  // Mail form — no wiring needed there.
+  document.querySelectorAll('a.mail-cta[data-opens="mail"]').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const win = windows['mail'];
+      const iconEl = document.querySelector('.desktop-icon[data-opens="mail"]');
+      if (win && !win.hidden) focusWindow(win);
+      else openWindow('mail', iconEl);
+    });
+  });
+})();
+
+// --- Mail form submit. Lives outside the desktop IIFE so mobile
+// (which bails on the desktop sim early) still gets a working form.
+(function () {
+  const form = document.querySelector('.mail-form');
+  if (!form) return;
+  const status = form.querySelector('.mail-status');
+  const submitBtn = form.querySelector('.mail-submit');
+
+  function setStatus(msg, kind) {
+    if (!status) return;
+    status.textContent = msg;
+    status.dataset.kind = kind || '';
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const first = form.first_name.value.trim();
+    const last = form.last_name.value.trim();
+    const email = form.email.value.trim();
+
+    if (!first) { setStatus('First name required.', 'err'); form.first_name.focus(); return; }
+    if (!email || !email.includes('@')) { setStatus('Valid email required.', 'err'); form.email.focus(); return; }
+
+    submitBtn.disabled = true;
+    setStatus('Sending…', '');
+
+    const name = [first, last].filter(Boolean).join(' ');
+
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          email,
+          name,
+          marketing_opt_in: true,
+          consent_version: 'mailing_list_v1',
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data && data.ok) {
+        setStatus("You're on the list. See you at the next drop.", 'ok');
+        form.reset();
+      } else {
+        const detail = (data && (data.error || data.details)) || `HTTP ${res.status}`;
+        setStatus('Something went wrong: ' + detail, 'err');
+      }
+    } catch (err) {
+      setStatus("Couldn't reach the server. Try again in a bit.", 'err');
+    } finally {
+      submitBtn.disabled = false;
+    }
   });
 })();

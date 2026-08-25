@@ -1,50 +1,6 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <script>
-      (function () {
-        function writeAccess(v) {
-          try {
-            if (v) localStorage.setItem("fafo_access", "1");
-            else localStorage.removeItem("fafo_access");
-          } catch (e) {}
-        }
-
-        // Returns "ok" (authorized), "denied" (server said no — cookie is
-        // missing or expired), or "unknown" (network error, 404, 5xx, or a
-        // malformed response — the gate didn't get a chance to decide, so
-        // don't act on the result).
-        async function checkGate() {
-          try {
-            const res = await fetch("/api/gate", { credentials: "include" });
-            if (res.status === 401) return "denied";
-            if (!res.ok) return "unknown";
-            const data = await res.json().catch(() => null);
-            if (data && data.ok) return "ok";
-            return "unknown";
-          } catch (e) {
-            return "unknown";
-          }
-        }
-
-        function redirectToLogin() {
-          const next = encodeURIComponent(location.pathname + location.search);
-          location.replace(`/login/?next=${next}`);
-        }
-
-        // Always verify the cookie server-side. The localStorage flag is a
-        // fast-render hint only — it lets the page paint before the gate
-        // check finishes. On "denied" we clear the stale flag and bounce to
-        // /login so an expired cookie doesn't silently break authed API
-        // calls (downloads showed "not available on site"). On "unknown"
-        // we do nothing — preserves the local-dev bypass (static preview
-        // 404s /api/gate) and avoids kicking users out on a network blip.
-        checkGate().then((result) => {
-          if (result === "ok") writeAccess(true);
-          else if (result === "denied") { writeAccess(false); redirectToLogin(); }
-        });
-      })();
-</script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Fork About and Find Out</title>
@@ -52,21 +8,16 @@
     <!-- Bump the ?v= when desktop.js / windows.css change so browsers don't
          serve a stale cached version during local iteration. The actual
          file path is unchanged; only the URL the cache keys on changes. -->
-    <link rel="stylesheet" href="/desktop/windows.css?v=intro-6" />
-    <script defer src="/desktop/desktop.js?v=intro-6"></script>
+    <link rel="stylesheet" href="/desktop/windows.css?v=nogate-1" />
+    <script defer src="/desktop/desktop.js?v=nogate-1"></script>
 
-    <!-- Intro choreography pre-flag. The deferred desktop.js below would
-         only run AFTER first paint, leaving a frame where the logo flashes
-         at full opacity before fading from 0. Setting this class inline,
-         before <body> renders, lets CSS keep the logo at opacity 0 from
-         the start. desktop.js consumes sessionStorage and runs the
-         actual reveal. -->
+    <!-- Intro choreography pre-flag. Set unconditionally before <body>
+         renders so CSS keeps the logo + icons at opacity 0 from the start;
+         desktop.js runs the reveal. Without this, the deferred desktop.js
+         would only run after first paint and the logo would flash at full
+         opacity before snapping to 0. -->
     <script>
-      try {
-        if (sessionStorage.getItem("fafo_just_logged_in") === "1") {
-          document.documentElement.classList.add("fafo-intro");
-        }
-      } catch (e) {}
+      document.documentElement.classList.add("fafo-intro");
     </script>
 
     <style>
@@ -304,6 +255,12 @@
             <span class="desktop-icon-label">Solitaire</span>
           </button>
         </li>
+        <li>
+          <button class="desktop-icon" type="button" data-opens="mail">
+            <span class="desktop-icon-glyph" data-glyph="mail" aria-hidden="true"></span>
+            <span class="desktop-icon-label">Mail</span>
+          </button>
+        </li>
       </ul>
 
       <!-- Welcome window: intro text, no menubar/toolbar/statusbar.
@@ -320,6 +277,44 @@
           <p class="intro">Welcome to Fork About and Find Out.</p>
           <p class="intro">Forking means taking a piece of code and duplicating it, allowing one to experiment and 'fork about' freely. This project is an interview series with the 'forkers' of this world (roughly) within tech and entrepreneurship.</p>
           <p class="intro">The rules end there, explore the site and hover over the episodes to discover more. <span class="fork-icon">🍴</span></p>
+          <p class="intro welcome-cta-row">
+            <a href="#mail" class="mail-cta" data-opens="mail">📬 Get notified about new episodes →</a>
+          </p>
+        </div>
+      </section>
+
+      <!-- Mail window: mailing-list subscribe form. Opens from the Mail
+           desktop icon and from the CTA link inside Welcome. On mobile,
+           the whole window flattens into the document flow (windows.css
+           mobile block) so a scrollable inline form is available without
+           JS window management. -->
+      <section class="app-window mail-window" data-window="mail" role="dialog" aria-label="Mailing list" hidden id="mail">
+        <header class="dw-titlebar" data-drag-handle>
+          <span class="dw-title">Mailing List</span>
+          <span class="dw-titlebar-controls">
+            <button class="dw-ctrl" type="button" data-close aria-label="Close"></button>
+          </span>
+        </header>
+        <div class="dw-content mail-content">
+          <p class="mail-intro">Get an email when the next interview drops. Nothing else.</p>
+          <form class="mail-form" novalidate>
+            <label class="mail-field">
+              <span>First name</span>
+              <input type="text" name="first_name" autocomplete="given-name" required />
+            </label>
+            <label class="mail-field">
+              <span>Last name</span>
+              <input type="text" name="last_name" autocomplete="family-name" />
+            </label>
+            <label class="mail-field">
+              <span>Email</span>
+              <input type="email" name="email" autocomplete="email" required />
+            </label>
+            <div class="mail-actions">
+              <button type="submit" class="mail-submit">Subscribe</button>
+            </div>
+            <p class="mail-status" role="status" aria-live="polite"></p>
+          </form>
         </div>
       </section>
 

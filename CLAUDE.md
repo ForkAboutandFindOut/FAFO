@@ -10,9 +10,9 @@ Interview series in tech / AI / company creation. Live site: https://forkaboutan
 
 ## Layout
 
-- `docs/` — static site (custom domain + GitHub Pages style). Entry is `docs/index.html`; the inline script at the top calls `/api/gate` and redirects to `/login/` if the visitor isn't allowed in.
+- `docs/` — static site (custom domain + GitHub Pages style). Entry is `docs/index.html`. No login gate — everyone lands directly on the desktop sim.
 - `docs/desktop/windows.css` + `docs/desktop/desktop.js` — desktop windowed sim (Win98-style desktop with icons + draggable, focusable, scale-animated windows). Both linked from `index.html`. See "Desktop windowed sim" below.
-- `functions/` — Cloudflare Pages Functions (TypeScript). API routes: `gate`, `send-otp`, `subscribe`, `unsubscribe`, `episodes/`. Auth callback at `auth/callback.ts`. Site-wide `_middleware.ts`.
+- `functions/` — Cloudflare Pages Functions (TypeScript). API routes: `subscribe`, `unsubscribe`, `episodes/[id]/download`. Site-wide `_middleware.ts` is a passthrough.
 - `episodes.yml` — source of truth for the podcast feed.
 - `tools/generate_feed.py` — generates `docs/feed.xml` from `episodes.yml`.
 - `tools/transcribe.py` — transcribes a guest MP3 via AssemblyAI (see Transcription section).
@@ -20,43 +20,24 @@ Interview series in tech / AI / company creation. Live site: https://forkaboutan
 - `tools/md_to_pdf.py` — renders a markdown file to PDF via headless Chrome. Used to produce the recording-day Live Sheet PDF (see Interview prep).
 - `package.json` — only dep is `@supabase/ssr` (used by the functions).
 
-## Auth gate — how it actually works
+## Mailing list — how it works
 
-Despite the filename `send-otp.ts`, there is **no real OTP**. Live flow:
+Site is fully public. Mailing-list signups happen via the **Mail window** in the desktop sim (icon in the desktop-icons strip + CTA link inside the Welcome window; on mobile the Mail window flattens into the document flow like Welcome). The form POSTs `{email, name, marketing_opt_in: true, consent_version: "mailing_list_v1"}` to `/api/subscribe`, which upserts into Supabase `mailing_list`. No cookie, no gate — response is `{ok: true}` or `{ok: false, error, details}`.
 
-1. `/login/` form → `POST /api/subscribe` with email + name.
-2. `/api/subscribe` upserts to Supabase `mailing_list` table, then sets a HMAC-signed cookie `fafo_gate` (180 days).
-3. Homepage inline script (in `docs/index.html` `<head>`) calls `/api/gate` on **every** page load and classifies the response as `"ok"` (200 — set `localStorage.fafo_access=1`), `"denied"` (401 — clear the flag, redirect to `/login/?next=<current>`), or `"unknown"` (404, 5xx, network error, malformed JSON — no-op). `localStorage.fafo_access` is a fast-render hint that lets the page paint without blocking on the check; the `fafo_gate` cookie is the source of truth.
+**Env vars (Cloudflare Pages dashboard):** `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (used by `/api/subscribe` — full DB admin), `UNSUBSCRIBE_SECRET` (HMAC for `/api/unsubscribe` tokens), `RESEND_API_KEY` (newsletter sends).
 
-**Don't "simplify" the gate script back to trusting localStorage without re-verifying.** An earlier version skipped `/api/gate` entirely when the flag was set, so expired cookies silently broke downloads (Chrome renders 401 on an `<a download>` as *"Failed - Not available on site"*) while the site UI still rendered normally, leaving the user with no recoverable path. The `"unknown"` branch exists to preserve the local static-preview bypass (which 404s `/api/gate`) and to avoid kicking users out on transient network issues.
-
-So the gate is mailing-list capture, not authentication — anyone can type any email and get in.
-
-**Dead code:** `functions/api/send-otp.ts` and `functions/auth/callback.ts` aren't reached by the live login form. Either old or future. Don't delete without asking.
-
-**Env vars (Cloudflare Pages dashboard):** `GATE_COOKIE_SECRET` (signs cookies — critical), `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (used by `/api/subscribe` — full DB admin), `UNSUBSCRIBE_SECRET` (HMAC for `/api/unsubscribe` tokens — deliberately separate from `GATE_COOKIE_SECRET` so the two trust domains don't overlap), `RESEND_API_KEY` (newsletter sends).
-
-**Supabase free-tier auto-pause:** the project pauses after ~1 week of inactivity. Symptom: `POST /api/subscribe` returns Cloudflare's plain-text `502` (not the function's JSON), so the login form shows the generic "Something went wrong." fallback. Fix: Supabase dashboard → Restore project, wait ~1 min, retry. `subscribe.ts` wraps its body in a top-level try/catch so other runtime errors return a real JSON `{ok:false, error, details}` instead of falling through to Cloudflare's 502 — but a paused project still won't accept writes. Prevention: `.github/workflows/keepalive-supabase.yml` pings the REST API every 3 days (needs `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` set as GitHub Actions secrets).
+**Supabase free-tier auto-pause:** the project pauses after ~1 week of inactivity. Symptom: `POST /api/subscribe` returns Cloudflare's plain-text `502` (not the function's JSON), so the mail form shows the generic "Something went wrong." fallback. Fix: Supabase dashboard → Restore project, wait ~1 min, retry. `subscribe.ts` wraps its body in a top-level try/catch so other runtime errors return a real JSON `{ok:false, error, details}` instead of falling through to Cloudflare's 502 — but a paused project still won't accept writes. Prevention: `.github/workflows/keepalive-supabase.yml` pings the REST API every 3 days (needs `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` set as GitHub Actions secrets).
 
 ## Aesthetic direction
 
 90s "windowcore", vibes-based (not strict Win98). Goal: full desktop simulation (taskbar, multiple windows, possibly Start menu) with modern UX underneath — no fake loading delays, no ironic gimmicks. Reference points: 98.css, 7.gui, aesthetic.computer. Done-state = "first friend reaction is 'whoa'". Desktop-first; mobile just needs to not break.
 
-## Login dialog
-
-`/login/index.html` is a Win98 "Enter Network Password" dialog (~480px). Empty navy titlebar (intentional — no title, no controls), spinning logo (96px) as the left icon, three fields on the right (**First name**, **Last name**, **Email**), mailing-list checkbox, single **OK** (no Cancel).
-
-- First/last name fields are **concatenated client-side** into a single `name` string before POST to `/api/subscribe`. The Supabase `mailing_list` table still stores `name`. Splitting into `first_name`/`last_name` columns is a propose-first change to `subscribe.ts` + schema.
-- Checkbox is 18×18 with `accent-color: #000080`. A JS click handler on `.checkrow` toggles the box from clicks **anywhere on the row** (label, gap, emoji); clicks on the checkbox itself fall through to native — no double-toggle.
-- Custom FAFO cursor everywhere via `*{ cursor: url(...) 0 0, auto }`. Don't override with `pointer` — visual consistency wins over click affordance.
-- On successful submit, `runBootSequence(firstName)` plays before the redirect (see Boot sequence below).
-
 ## Wow-factor roadmap
 
 Path to the "Aesthetic direction" desktop-sim goal:
 
-- **Login as Win98 dialog.** Done, deployed. See Login dialog above.
-- **Boot sequence transition.** Done, deployed. See Boot sequence below.
+- ~~**Login as Win98 dialog.**~~ Removed (site is public now). `/login/` deleted.
+- ~~**Boot sequence transition.**~~ Removed with the login dialog.
 - **Intro copy as Win98 system text.** Done. Lived briefly in the hero window; now lives inside the Welcome window in the desktop sim.
 - **E.1 — Hero/Episodes/Solitaire fixed-position layout.** Superseded by the full desktop sim — the `.hero-wrap` markup and always-visible windows are gone.
 - **E.2 — Real Solitaire video.** Done. `docs/assets/solitaire.webm` (25s VP9 loop, 805 KiB), displayed inside the Solitaire app-window.
@@ -64,33 +45,21 @@ Path to the "Aesthetic direction" desktop-sim goal:
 - **Playable Solitaire game** (deferred). User explored; verdict was to vendor an MIT-licensed JS Klondike clone (~30–50 KB) into the Solitaire window, keeping the video as the idle-state aesthetic. Hold until after the desktop sim ships.
 - **MS Paint window** (deferred, was Phase E original-scope). Wraps `/assets/fafo-logo.png` in Paint chrome with a fake toolbar/palette.
 
-## Boot sequence
+## Homepage intro choreography
 
-Plays once between login-submit success and the homepage redirect. ~3.5s total. Lives entirely in `docs/login/index.html` — CSS `.boot-screen` + JS `runBootSequence(firstName)`. Returning visitors are caught by the existing `checkGate()` IIFE at the top of the file and never see it (no `sessionStorage` flag needed).
+Plays on **every** visit. ~3s total. Ambient logo fades in over 3s; icons fade in and Welcome opens (unless previously closed) after the logo fade.
 
-- **Font:** Pixel Operator 8 (already in `/assets/`) at 16px — clean 2× of its native 8px so it stays crisp. `text-shadow: 1px 0 0 currentColor` simulates bold without faux-bolding the pixel glyphs, which would look terrible.
-- **Typing uses `requestAnimationFrame`, not `setTimeout`.** Per-char `setTimeout(fn, ~11ms)` gets clamped to ~16ms+ on most browsers and aggressively throttled in background tabs — would stretch a 3.5s sequence to 15s+. rAF runs at the display refresh rate and adds however many chars the requested `cps` requires per frame.
-- **No fade-out.** The boot screen stays at `opacity: 1` right up until `window.location.assign(next)` fires, so the login dialog underneath never flashes through during the transition. A fade-out version was tried; it visibly leaked the dialog for ~300ms.
-- **Tuning knobs** are the `lines` array inside `runBootSequence`: `cps` (chars/sec per line) and `gapAfter` (post-line pause in ms). Bumping all three POST-line `cps` by +20 shaves ~225ms.
-- **On viewports narrower than ~880px** the 54-char POST lines clip on the right. Intentional — desktop-first per Aesthetic direction; mobile "just needs to not break" and clipped text isn't broken.
-
-**Preview-tool caveat:** Claude Preview / headless Chrome heavily throttles `requestAnimationFrame` when the tab isn't focused, making the sequence appear 5–10× slower than reality. Trust the math (sum of `text.length/cps + gapAfter`), not preview wall-clock timings. The DOM state after the Promise resolves is reliable; per-frame timing isn't.
-
-**Hand-off to homepage intro.** The login form sets `sessionStorage.fafo_just_logged_in = "1"` right before `window.location.assign(next)` fires. The homepage reads + consumes that flag to trigger its own post-login intro choreography — see "Post-login intro choreography" below.
-
-## Post-login intro choreography
-
-Plays on the homepage, *after* the boot sequence, on the visitor's first arrival post-login. ~3.5s total. Returning visitors skip it entirely (their `sessionStorage` flag isn't set).
-
-- Pre-flag: inline `<script>` in `docs/index.html` `<head>` reads `sessionStorage.fafo_just_logged_in` and adds `html.fafo-intro` **before first paint**. Pattern is *FOUC prevention* — without this, the deferred `desktop.js` would only run after the first paint, so the logo would flash at full opacity before snapping to 0 and fading in.
+- Pre-flag: inline `<script>` in `docs/index.html` `<head>` adds `html.fafo-intro` unconditionally **before first paint**. Pattern is *FOUC prevention* — without this, the deferred `desktop.js` would only run after first paint, so the logo would flash at full opacity before snapping to 0 and fading in.
 - `windows.css` rules under `html.fafo-intro` set `.ambient-logo` and `.desktop-icons` to `opacity: 0` with `transition: opacity 3s` and `0.4s` respectively. `.fafo-intro-logo-in` / `.fafo-intro-icons-in` flip them to `opacity: 1`.
-- `desktop.js` orchestrates: read + clear the sessionStorage flag → `requestAnimationFrame` → add `fafo-intro-logo-in` (3s CSS fade kicks in) → `setTimeout(3000)` → add `fafo-intro-icons-in` AND call `openWindow('welcome')` (unless previously closed).
+- `desktop.js` orchestrates: `requestAnimationFrame` → add `fafo-intro-logo-in` (3s CSS fade kicks in) → `setTimeout(3000)` → add `fafo-intro-icons-in` AND call `openWindow('welcome')` (unless previously closed).
+
+**Preview-tool caveat:** Claude Preview / headless Chrome heavily throttles `requestAnimationFrame` and CSS transitions when the tab isn't focused, so the sequence appears frozen. Trust the DOM state after the setTimeout resolves, not the visual.
 
 ## Desktop windowed sim
 
 Files: `docs/index.html` (markup), `docs/desktop/windows.css` (style), `docs/desktop/desktop.js` (window manager, ~150 lines, vanilla, no deps).
 
-**Structure.** `<main class="desktop">` contains: ambient spinning logo (`<video class="ambient-logo">`, transparent VP8-alpha webm, 80vmin, opacity 1 — was 0.35, bumped for hero presence); icon strip top-left (`<ul class="desktop-icons">`, three icons: Welcome / Episodes / Solitaire); three `<section class="app-window" data-window="…" hidden>` (Welcome, Solitaire, Episodes). Icons **toggle** the corresponding window on click — open if hidden, close if visible (closing Welcome via icon still writes `fafo_welcome_closed`, matching the X-button behaviour). Welcome auto-opens on first visit *unless* the intro choreography is running, in which case it opens after the 3s logo fade.
+**Structure.** `<main class="desktop">` contains: ambient spinning logo (`<video class="ambient-logo">`, transparent VP8-alpha webm, 80vmin, opacity 1 — was 0.35, bumped for hero presence); icon strip top-left (`<ul class="desktop-icons">`, four icons: Welcome / Episodes / Solitaire / Mail); four `<section class="app-window" data-window="…" hidden>` (Welcome, Solitaire, Episodes, Mail). Icons **toggle** the corresponding window on click — open if hidden, close if visible (closing Welcome via icon still writes `fafo_welcome_closed`, matching the X-button behaviour). Welcome auto-opens on first visit *unless* the intro choreography is running, in which case it opens after the 3s logo fade. The Welcome window also contains a "Get notified about new episodes →" CTA (`a.mail-cta[href="#mail"]`) that opens the Mail window on desktop and falls through to a native anchor scroll on mobile.
 
 **Browser-edge resize buffer.** `.desktop { inset: 16px }` exposes a 16px frame of teal `<html>` background at the viewport edge. The cursor declarations are scoped to `body *` (not `*`), so `html` keeps the system cursor — and the browser's window-resize cursor can take over cleanly when you slide toward the Chrome tab edge. The teal-on-teal frame is visually invisible.
 
@@ -98,20 +67,20 @@ Files: `docs/index.html` (markup), `docs/desktop/windows.css` (style), `docs/des
 
 **JS behaviour (`desktop.js`):**
 
-- Bails entirely on `<880px` viewport (mobile path handled by CSS).
-- Welcome auto-opens unless `localStorage.fafo_welcome_closed` is set; closing Welcome writes that flag. Auto-open is deferred when the post-login intro choreography is running.
+- Bails entirely on `<880px` viewport (mobile path handled by CSS). A second `(function(){…})()` at the end of the file wires the Mail form submit; it runs on both desktop and mobile because it's outside the bail.
+- Welcome auto-opens unless `localStorage.fafo_welcome_closed` is set; closing Welcome writes that flag. Auto-open is deferred by 3s (the logo-fade window) so the sequence stays: logo fades in → icons + Welcome.
 - **Episodes window statusbar text is dynamic** — read from `.episode-card` count by `desktop.js`, written to `.episodes-window .dw-status-cell`. Replaces the previous "remember to bump `6 episode(s)`" footgun.
 - Open/close zoom: `setOriginFromIcon()` sets `transform-origin` to the icon's centre relative to the window. `.is-opening` instantly snaps to `scale(0.08) opacity(0)` via `transition: none`; rAF removes the class → CSS transitions back to scale(1) opacity(1). `.is-closing` does the reverse; `setTimeout(180ms)` then sets `hidden=true` and runs side-effects (pause Solitaire video, persist Welcome close).
 - Drag from `.dw-titlebar[data-drag-handle]` (ignored if click hits `.dw-titlebar-controls`). Mousedown reads `getBoundingClientRect`, converts to **offsetParent-relative** coords (subtract `offsetParent.getBoundingClientRect()`), writes inline `left`/`top`, **and clears `right`/`bottom`**. Without the offsetParent subtraction the window snaps 16px down-right on mousedown because `.desktop { inset: 16px }` shifts the containing block; without clearing right/bottom the window only moves on one axis because the CSS pin still applies. Constraint: ≥80px of titlebar visible horizontally; titlebar can't go above y=0.
 - Focus on mousedown anywhere inside a window: monotonic `topZ` counter (starts at CSS baseline z-index 10) writes to inline `z-index`. `.is-focused` class on focused window; `:not(.is-focused) .dw-titlebar` dims to flat grey (`--w98-shadow`).
 
-**Mobile (<880px).** Desktop chrome (icons, ambient logo, Solitaire window) hidden via `display: none`. Welcome and Episodes wrappers `display: contents` so their inner content flows in normal document flow; titlebar/menubar hidden. **Welcome's `display: contents` selector must out-specify UA's `[hidden]`** (`.app-window[data-window="welcome"]` is 0,0,2,0 vs 0,0,1,0) because `desktop.js` bails before unhiding Welcome — otherwise mobile visitors see no intro text. **Welcome's `.dw-content` on mobile uses a Win98 panel** (grey face + 2px black border + 2px drop shadow), matching the visual language of the episode portrait boxes below it — replaces an earlier transparent/bare-text rendering.
+**Mobile (<880px).** Desktop chrome (icons, ambient logo, Solitaire window) hidden via `display: none`. Welcome, Episodes and Mail wrappers `display: contents` so their inner content flows in normal document flow; titlebar/menubar hidden. **The `display: contents` selectors must out-specify UA's `[hidden]`** (`.app-window[data-window="welcome"]` is 0,0,2,0 vs 0,0,1,0) because `desktop.js` bails before unhiding these — otherwise mobile visitors see no intro text and no mail form. **Welcome + Mail `.dw-content` on mobile use a Win98 panel** (grey face + 2px black border + 2px drop shadow), matching the visual language of the episode portrait boxes below them.
 
 **Squeeze resilience.** Episodes is the only window wide enough to crowd narrow desktop viewports. Uses `width: clamp(420px, 80vw, 720px)` and `left: clamp(40px, 10vw, 140px)` — original 720/140 at 1440px design target; shrinks to 704/88 at 880px (bumps right margin from 16 → 84). Solitaire and Welcome are right-pinned, no width fluidity needed.
 
-**Cache-bust.** `index.html` references `windows.css?v=intro-N` and `desktop.js?v=intro-N` (the label evolved from `phase-X` once Phases A–F shipped). Bump the version any time those files change so local Python http.server doesn't serve stale scripts. Production deploys via Cloudflare don't need this (their cache is keyed differently); the `?v=` is harmless either way. **Portrait images use the same `?v=N` pattern** — bump on `.episode-portrait` `src` when the underlying file changes.
+**Cache-bust.** `index.html` references `windows.css?v=nogate-N` and `desktop.js?v=nogate-N` (labels have evolved: `phase-X` → `intro-X` → `nogate-X`). Bump the version any time those files change so local Python http.server doesn't serve stale scripts. Production deploys via Cloudflare don't need this (their cache is keyed differently); the `?v=` is harmless either way. **Portrait images use the same `?v=N` pattern** — bump on `.episode-portrait` `src` when the underlying file changes.
 
-**Win98 palette `--w98-*` is duplicated in three files** (`docs/index.html`, `docs/login/index.html`, `docs/desktop/windows.css`). Still worth extracting to `docs/assets/w98.css` if a fourth file needs them.
+**Win98 palette `--w98-*` is duplicated in two files** (`docs/index.html`, `docs/desktop/windows.css`). Still worth extracting to `docs/assets/w98.css` if a third file needs them.
 
 **Assets used by the sim:**
 
@@ -121,8 +90,8 @@ Files: `docs/index.html` (markup), `docs/desktop/windows.css` (style), `docs/des
 
 ## Workflow facts
 
-- Audio lives in Cloudflare R2; download endpoint streams from there. R2 keys follow `episodes/epNNN.mp3`; `functions/_episodes.ts` maps id → r2_key + display filename.
-- Visitor flow: land → enter email → site → download. The mailing list is now actually sent to — one newsletter per new episode via `tools/send_newsletter.py` (see Newsletter pipeline below).
+- Audio lives in Cloudflare R2; download endpoint streams from there. R2 keys follow `episodes/epNNN.mp3`; `functions/_episodes.ts` maps id → r2_key + display filename. Downloads are public — no cookie/auth check.
+- Visitor flow: land → intro choreography → browse → download. Subscribing is optional and lives in the Mail window (icon + Welcome CTA). One newsletter per new episode goes to opt-in subscribers via `tools/send_newsletter.py` (see Newsletter pipeline below).
 - Episode-add automation was written by Codex.
 - Deploy: Cloudflare Pages connected to this GitHub repo, auto-builds on push to `main`.
 
@@ -132,7 +101,7 @@ Files: `docs/index.html` (markup), `docs/desktop/windows.css` (style), `docs/des
 2. Add the `<article class="episode-card">` block at the top of the grid in `docs/index.html` (newest first). Bump the portrait's `?v=` if reusing a filename. Description follows `EPISODE_DESCRIPTIONS.md` style.
 3. Add the episode entry to `functions/_episodes.ts` (`id`, `title`, `r2_key`, `filename`).
 4. Upload the MP3 to R2 under the key declared in step 3.
-5. Commit + push. Verify on live: click portrait, confirm MP3 download streams (gate cookie required).
+5. Commit + push. Verify on live: click portrait, confirm MP3 download streams.
 6. Edit `SUBJECT` + `BODY_TEXT` in `tools/send_newsletter.py`, run `--to-self` to eyeball, then `--schedule "<ISO UTC time>"` for the real send.
 
 ### Temporarily hiding an episode
@@ -150,9 +119,9 @@ Sends one email per new episode from `sasha@forkaboutandfindout.co.uk` via Resen
 
 **Files:**
 - `tools/send_newsletter.py` — Python stdlib only, runs locally.
-- `functions/api/unsubscribe.ts` — Cloudflare Function. Two-step flow: `GET` shows a Win98-styled confirmation page (no DB write — Apple Mail Privacy Protection prefetches links and would otherwise silently unsubscribe people), `POST` sets `marketing_opt_in = false` (preserves the gate cookie row so they're not booted from the site).
+- `functions/api/unsubscribe.ts` — Cloudflare Function. Two-step flow: `GET` shows a Win98-styled confirmation page (no DB write — Apple Mail Privacy Protection prefetches links and would otherwise silently unsubscribe people), `POST` sets `marketing_opt_in = false`.
 
-**HMAC secret:** unsubscribe URLs are signed with `UNSUBSCRIBE_SECRET`, **deliberately separate** from `GATE_COOKIE_SECRET`. Don't reuse the gate secret — separation of trust domains.
+**HMAC secret:** unsubscribe URLs are signed with `UNSUBSCRIBE_SECRET` (set in Cloudflare Pages dashboard + local `.env`).
 
 **Local `.env`** at repo root (gitignored):
 ```
@@ -183,7 +152,7 @@ User is happy with how the site *functions* today. Don't propose functional chan
 ## Scope license
 
 - `docs/` HTML/CSS — refactor freely, split into separate files if helpful.
-- Functions / auth — propose first.
+- Functions (`subscribe`, `unsubscribe`, `episodes/[id]/download`) — propose first.
 
 ## Local dev
 
@@ -193,13 +162,11 @@ Static-only preview (enough for styling, no functions):
 cd docs && python3 -m http.server 8000
 ```
 
-Visit `http://localhost:8000/`. The gate's `/api/gate` call will 404; bypass once by visiting `/login/` (gate doesn't auto-redirect that page), opening DevTools, and running `localStorage.setItem("fafo_access","1")`, then navigating to `/`. The flag persists.
+Visit `http://localhost:8000/`. Site loads directly — no gate. The mail form's `POST /api/subscribe` will 501 in the static preview (Python http.server refuses POST); the error path handles it gracefully. For end-to-end function testing, push the working branch and use Cloudflare Pages' auto-deployed preview URL.
 
-For testing functions/auth locally, set up `wrangler` with a `.dev.vars` file (not done yet). For "is this actually working in prod" checks, push the working branch and use Cloudflare Pages' auto-deployed preview URL.
+**Cache-bust during JS iteration.** Python http.server sends no cache-control headers; browsers will serve stale `desktop.js` / `windows.css` for as long as they feel like it. `index.html` references those files with a `?v=nogate-N` query — bump the label any time the file changes and the URL changes too, so the browser refetches. Alternative: keep DevTools open with "Disable cache" ticked.
 
-**Cache-bust during JS iteration.** Python http.server sends no cache-control headers; browsers will serve stale `desktop.js` / `windows.css` for as long as they feel like it. `index.html` references those files with a `?v=intro-N` query — bump the label any time the file changes and the URL changes too, so the browser refetches. Alternative: keep DevTools open with "Disable cache" ticked.
-
-**Preview-tool gotcha:** macOS sandboxes Claude's Python subprocesses from `~/Desktop/`, so the Claude Preview MCP can't serve files from this repo directly. To use `preview_start` / `preview_screenshot`, copy `docs/` to `/tmp/fafo-preview/` first and point `~/.claude/launch.json` at `--directory /tmp/fafo-preview`. The Bash `python3 -m http.server` invocation above is unaffected. Also: the headless preview tab is treated as `document.hidden`, which **pauses CSS transitions and throttles `requestAnimationFrame` to ~0Hz** — animations and rAF-driven code (boot sequence, desktop sim open/close zoom) won't visibly run in the preview. Verify the DOM state at the end; trust the math; eyeball in a real browser for animation polish.
+**Preview-tool gotcha:** macOS sandboxes Claude's Python subprocesses from `~/Desktop/`, so the Claude Preview MCP can't serve files from this repo directly. To use `preview_start`, copy `docs/` to `/tmp/fafo-preview/` first and point `~/.claude/launch.json` at `--directory /tmp/fafo-preview`. (Media files like the ambient logo webm sometimes fail to copy — non-blocking for verification, the DOM/JS still work.) Also: the headless preview tab is treated as `document.hidden`, which **pauses CSS transitions and throttles `requestAnimationFrame` to ~0Hz** — animations and rAF-driven code (intro choreography, desktop sim open/close zoom) won't visibly run in the preview. Verify DOM state; eyeball animation polish in a real browser.
 
 ## Conventions
 

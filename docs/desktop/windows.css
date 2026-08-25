@@ -329,6 +329,25 @@
   .app-window[data-window="welcome"] .intro {
     text-align: center;
   }
+
+  /* Mail window: same trick as Welcome — wrapper vanishes so the form
+     flows in the document. Titlebar hidden; content styled as a Win98
+     panel matching the other mobile widgets. Specificity 0,0,2,0 beats
+     UA [hidden] (0,0,1,0), critical because desktop.js bails on mobile
+     and never unhides the window. */
+  .app-window[data-window="mail"] {
+    display: contents;
+  }
+  .app-window[data-window="mail"] .dw-titlebar {
+    display: none;
+  }
+  .app-window[data-window="mail"] .dw-content {
+    background: var(--w98-face);
+    border: 2px solid #000;
+    box-shadow: 2px 2px 0 #000;
+    margin: 16px;
+    padding: 14px 18px;
+  }
 }
 
 /* --- Desktop (≥880px): the windowed layout ------------------------- */
@@ -450,6 +469,10 @@
   /* Win98 info circle — matches the icon shown in the Welcome titlebar. */
   .desktop-icon-glyph[data-glyph="info"] {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" shape-rendering="crispEdges"><circle cx="22" cy="22" r="18" fill="white" stroke="black" stroke-width="1.5"/><text x="22" y="32" font-family="serif" font-size="28" font-weight="bold" font-style="italic" text-anchor="middle" fill="black">i</text></svg>');
+  }
+  /* Envelope for the Mail icon. */
+  .desktop-icon-glyph[data-glyph="mail"] {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" shape-rendering="crispEdges"><rect x="4" y="12" width="36" height="24" fill="white" stroke="black" stroke-width="1.5"/><path d="M4 12 L22 26 L40 12" fill="none" stroke="black" stroke-width="1.5"/></svg>');
   }
 
   /* --- App windows --------------------------------------------------
@@ -597,4 +620,113 @@
     padding: 4px;
     display: flex;
   }
+
+  /* Mail window — top-left-ish so it doesn't collide with Welcome
+     (top-right) or Solitaire (bottom-right). Non-fluid width; the form
+     fits comfortably at 340px. */
+  .app-window[data-window="mail"] {
+    top: 110px;
+    left: 240px;
+    width: 340px;
+  }
+  .app-window[data-window="mail"] .dw-title::before {
+    /* small envelope glyph next to the titlebar text */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 10"><rect x="1" y="1" width="12" height="8" fill="white" stroke="black" stroke-width="0.8"/><path d="M1 1 L7 6 L13 1" fill="none" stroke="black" stroke-width="0.8"/></svg>');
+    height: 10px;
+  }
+  .app-window[data-window="mail"] .dw-content {
+    padding: 14px 16px;
+    background: var(--w98-face);
+    border: 0;
+    margin: 0;
+  }
+}
+
+/* --- Mail window form (shared across desktop + mobile) ---------------- */
+.mail-intro {
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.mail-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mail-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+}
+.mail-field > span {
+  font-weight: 700;
+}
+/* Win98 sunken-input bevel: dark on top+left, light on bottom+right. */
+.mail-field input {
+  font-family: "MS Sans Serif", Tahoma, Verdana, Arial, sans-serif;
+  font-size: 12px;
+  padding: 3px 5px;
+  background: #ffffff;
+  border-style: solid;
+  border-width: 2px;
+  border-color: var(--w98-shadow) var(--w98-hilite) var(--w98-hilite) var(--w98-shadow);
+  outline: none;
+}
+.mail-field input:focus {
+  background: #ffffe1;
+}
+.mail-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+/* Win98 raised button. */
+.mail-submit {
+  font-family: "MS Sans Serif", Tahoma, Verdana, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 16px;
+  background: var(--w98-face);
+  color: var(--w98-text);
+  border: 2px solid;
+  border-color: var(--w98-hilite) var(--w98-shadow) var(--w98-shadow) var(--w98-hilite);
+  box-shadow: inset -1px -1px 0 var(--w98-shadow), inset 1px 1px 0 var(--w98-hilite);
+}
+.mail-submit:active:not(:disabled) {
+  border-color: var(--w98-shadow) var(--w98-hilite) var(--w98-hilite) var(--w98-shadow);
+  box-shadow: inset 1px 1px 0 var(--w98-shadow), inset -1px -1px 0 var(--w98-hilite);
+}
+.mail-submit:disabled {
+  color: var(--w98-shadow);
+}
+.mail-status {
+  min-height: 1.2em;
+  margin: 4px 0 0;
+  font-size: 11px;
+  line-height: 1.3;
+}
+.mail-status[data-kind="ok"] { color: #006400; font-weight: 700; }
+.mail-status[data-kind="err"] { color: #a00000; font-weight: 700; }
+
+/* CTA link inside Welcome that opens the Mail window. Bordered pill in
+   the Win98 button style so it reads as a click target, not a link. */
+.welcome-cta-row {
+  margin-top: 14px !important;
+}
+.mail-cta {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--w98-text);
+  text-decoration: none;
+  background: var(--w98-face);
+  border: 2px solid;
+  border-color: var(--w98-hilite) var(--w98-shadow) var(--w98-shadow) var(--w98-hilite);
+  box-shadow: inset -1px -1px 0 var(--w98-shadow), inset 1px 1px 0 var(--w98-hilite);
+}
+.mail-cta:active {
+  border-color: var(--w98-shadow) var(--w98-hilite) var(--w98-hilite) var(--w98-shadow);
+  box-shadow: inset 1px 1px 0 var(--w98-shadow), inset -1px -1px 0 var(--w98-hilite);
 }
