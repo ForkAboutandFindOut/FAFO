@@ -341,7 +341,7 @@
       });
       const data = await res.json().catch(() => null);
       if (res.ok && data && data.ok) {
-        setStatus("You're on the list. See you at the next drop.", 'ok');
+        setStatus("You're on the list :)", 'ok');
         form.reset();
       } else {
         const detail = (data && (data.error || data.details)) || `HTTP ${res.status}`;
