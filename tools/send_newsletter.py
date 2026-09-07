@@ -56,14 +56,14 @@ REPLY_TO = "sasha@forkaboutandfindout.co.uk"
 
 # Subject + body. Edit before each new episode. Body is plain text with
 # {first_name} and {unsubscribe_url} placeholders — formatted per recipient.
-SUBJECT = "'Jevons Paradox' — ep 9 of Fork About and Find Out"
+SUBJECT = "'Long Term Partner' — ep 10 of Fork About and Find Out"
 
 BODY_TEXT = """\
 Hi {first_name},
 
-Episode 9 is up: 'Jevons Paradox' with Theo Bui.
+Episode 10 is up: 'Long Term Partner' with Alexander Konoplyasty.
 
-Theo is co-founder and CTO of 8x, an orchestration platform for human work with over 200,000 people across more than 30 countries. Our conversation started with the framing, why 'orchestration' rather than 'agency'. We then moved through 8x's growth curve, its playbook of chasing under-covered organic lanes, its hackathon-driven hiring rotation across London, Ljubljana and Berlin. We finished on where AI has actually made 8x need more humans, not fewer.
+Alexander is co-founder and Managing Partner of Flashpoint, a London-based firm running half a billion dollars across venture growth, growth debt and direct secondaries, with Guesty, Chess.com and Preply in the portfolio. Our conversation started with why that stack exists, and why Flashpoint treats the founder, not the fund, as its client. Fund IV, targeting $150-200 million, is the first to pull institutional money after three family-office funds. We finished on who Flashpoint hunts for: European founders leaving home markets, and the trust gap waiting in New York.
 
 To listen to the full interview:
 
