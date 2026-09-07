@@ -261,7 +261,7 @@ For article/quote research, prefer the `.txt` files under `whisperx/` for older 
 **Going forward — use `tools/transcribe.py` (AssemblyAI):**
 
 1. `export ASSEMBLYAI_API_KEY="..."` — keep in `~/.zshrc`, never paste in chat.
-2. `python3 tools/transcribe.py <path-to-mp3>` — uploads, runs `universal-2` with `speaker_labels`, polls until done, writes `<base>_AssemblyAI.json` (raw, for analysis) + `<base>_Transcript.md` (speaker-labelled, shareable). ~45-min interview = ~$0.20, ~1 min wall-clock.
+2. `python3 tools/transcribe.py <path-to-mp3>` — uploads, runs `universal-2` with `speaker_labels`, polls until done, writes `<base>_AssemblyAI.json` (raw, for analysis) + `<base>_Transcript.md` (speaker-labelled, shareable). ~45-min interview = ~$0.20, ~1 min wall-clock. **If the MP3 lives in Google Drive File Stream** (`~/Library/CloudStorage/GoogleDrive-.../My Drive/…`), python may raise `OSError: [Errno 89] Operation canceled` while reading the cloud stub. Copy the MP3 to a local path first (`cp <drive-path> /tmp/`), transcribe from there, then move the outputs back into the guest folder — do this before the remap pass so speaker names are already right when the files land in Drive.
 3. **AssemblyAI often over-splits one speaker into multiple IDs** (e.g. host = A, guest gets split across B and C). After the script runs, do a one-off Python pass to remap speakers to real names and merge consecutive same-speaker turns. See ep007 for the pattern.
 4. Hand-pass for mishears before sharing with the guest — proper nouns and in-jokes are where the model misses. Spot-check by reading end-to-end at least once.
 5. Send raw to the guest unless they ask for a cleaned version — let them flag their own preferred edits.
